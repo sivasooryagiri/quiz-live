@@ -61,7 +61,6 @@ export const startQuiz = () =>
     questionStartTime: serverTimestamp(),
   });
 
-/** Only transitions question→results (idempotent via transaction) */
 export const advanceToResults = () =>
   runTransaction(db, async (tx) => {
     const snap = await tx.get(gameRef);
@@ -136,7 +135,6 @@ export const reorderQuestions = async (orderedIds) => {
 };
 
 // ─── Players ──────────────────────────────────────────────────
-/** Returns player id (existing or newly created). */
 export const joinGame = async (name) => {
   const existing = await getDocs(
     query(playersCol(), where('name', '==', name))
@@ -169,8 +167,8 @@ export const getPlayer = (id) =>
 
 // ─── Answers ──────────────────────────────────────────────────
 /**
+ * Supports re-submission: subtracts old score, adds new score.
  * score = correct ? max(100, 1000 - floor(timeTaken) * 50) : 0
- * timeTaken in seconds; minimum 100 pts for any correct answer.
  */
 export const submitAnswer = async ({
   questionId,
@@ -184,8 +182,14 @@ export const submitAnswer = async ({
     ? Math.max(100, 1000 - Math.floor(timeTaken) * 50)
     : 0;
 
-  const answerId = `${questionId}_${playerId}`;
-  await setDoc(doc(db, 'answers', answerId), {
+  const answerId  = `${questionId}_${playerId}`;
+  const answerRef = doc(db, 'answers', answerId);
+
+  // Get existing answer to calculate score delta
+  const existing  = await getDoc(answerRef);
+  const oldScore  = existing.exists() ? (existing.data().score || 0) : 0;
+
+  await setDoc(answerRef, {
     questionId,
     playerId,
     answer,
@@ -195,12 +199,13 @@ export const submitAnswer = async ({
     timestamp: serverTimestamp(),
   });
 
-  // Atomically increment player score
+  // Atomically adjust player score (subtract old, add new)
   await runTransaction(db, async (tx) => {
     const playerRef  = doc(db, 'players', playerId);
     const playerSnap = await tx.get(playerRef);
     if (playerSnap.exists()) {
-      tx.update(playerRef, { score: (playerSnap.data().score || 0) + score });
+      const current = playerSnap.data().score || 0;
+      tx.update(playerRef, { score: current - oldScore + score });
     }
   });
 

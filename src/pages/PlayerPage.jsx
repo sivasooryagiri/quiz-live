@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import useGameState from '../hooks/useGameState';
 import usePlayer    from '../hooks/usePlayer';
-import { subscribeToQuestions, getPlayerAnswer } from '../firebase/db';
+import { subscribeToQuestions } from '../firebase/db';
 import JoinScreen        from '../components/player/JoinScreen';
 import LobbyScreen       from '../components/player/LobbyScreen';
 import QuestionScreen    from '../components/player/QuestionScreen';
@@ -19,35 +19,14 @@ const fade = {
 };
 
 export default function PlayerPage() {
-  const { gameState, loading }                      = useGameState();
+  const { gameState, loading }                         = useGameState();
   const { playerId, playerName, join, joining, error } = usePlayer();
-  const [questions, setQuestions]                   = useState([]);
-  const [hasAnswered, setHasAnswered]               = useState(false);
-  const [checkedQId, setCheckedQId]                 = useState(null);
+  const [questions, setQuestions]                      = useState([]);
 
-  // Subscribe to questions
   useEffect(() => {
     const unsub = subscribeToQuestions(setQuestions);
     return unsub;
   }, []);
-
-  // Reset answered flag when question index changes
-  useEffect(() => {
-    setHasAnswered(false);
-    setCheckedQId(null);
-  }, [gameState?.currentQuestionIndex]);
-
-  // On rejoin: check if player already answered current question
-  useEffect(() => {
-    if (!playerId || !gameState || gameState.phase !== 'question' || !questions.length) return;
-    const currentQ = questions[gameState.currentQuestionIndex];
-    if (!currentQ || checkedQId === currentQ.id) return;
-
-    setCheckedQId(currentQ.id);
-    getPlayerAnswer(currentQ.id, playerId).then((ans) => {
-      if (ans) setHasAnswered(true);
-    });
-  }, [playerId, gameState?.phase, gameState?.currentQuestionIndex, questions, checkedQId]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -68,26 +47,28 @@ export default function PlayerPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628]">
       <AnimatePresence mode="wait">
+
         {phase === 'waiting' && (
           <motion.div key="lobby" {...fade}>
             <LobbyScreen playerName={playerName} gameTitle={gameState?.title} />
           </motion.div>
         )}
 
-        {phase === 'question' && currentQ && !hasAnswered && (
+        {/* QuestionScreen manages its own answered/expired state */}
+        {phase === 'question' && currentQ && (
           <motion.div key={`q-${gameState.currentQuestionIndex}`} {...fade}>
             <QuestionScreen
               question={currentQ}
               playerId={playerId}
               questionStartTime={gameState.questionStartTime}
-              onAnswered={() => setHasAnswered(true)}
+              onAnswered={() => {}}
             />
           </motion.div>
         )}
 
-        {((phase === 'question' && hasAnswered) || phase === 'results') && (
-          <motion.div key="answer-wait" {...fade}>
-            <AnswerWaiting phase={phase} />
+        {phase === 'results' && (
+          <motion.div key="results" {...fade}>
+            <AnswerWaiting />
           </motion.div>
         )}
 
@@ -102,6 +83,7 @@ export default function PlayerPage() {
             <EndedScreen playerId={playerId} playerName={playerName} />
           </motion.div>
         )}
+
       </AnimatePresence>
     </div>
   );
