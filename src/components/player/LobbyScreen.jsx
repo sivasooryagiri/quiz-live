@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { subscribeToPlayerCount } from '../../firebase/db';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 export default function LobbyScreen({ playerName, gameTitle = 'QuizLive' }) {
   const [playerCount, setPlayerCount] = useState(0);
@@ -11,7 +12,7 @@ export default function LobbyScreen({ playerName, gameTitle = 'QuizLive' }) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628]">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628] pb-2">
       {/* Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-brand-800/20 rounded-full blur-3xl animate-pulse" />
@@ -61,6 +62,7 @@ export default function LobbyScreen({ playerName, gameTitle = 'QuizLive' }) {
           </div>
         </div>
       </motion.div>
+      <PoweredBySoluto />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 export default function JoinScreen({ onJoin, joining, error, suggested, onClearSuggested, gameTitle = 'QuizLive' }) {
   const [name, setName] = useState('');
@@ -118,6 +119,7 @@ export default function JoinScreen({ onJoin, joining, error, suggested, onClearS
           Min 2 characters · Max 20 characters
         </p>
       </motion.div>
+      <PoweredBySoluto />
     </div>
   );
 }

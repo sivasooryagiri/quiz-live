@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { subscribeToPlayers } from '../../firebase/db';
 import Particles from '../shared/Particles';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 export default function EndedScreen({ playerId, playerName }) {
   const [players, setPlayers] = useState([]);
@@ -52,6 +53,7 @@ export default function EndedScreen({ playerId, playerName }) {
           </motion.p>
         )}
       </motion.div>
+      <PoweredBySoluto />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { submitAnswer } from '../../firebase/db';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 const OPTION_STYLES = [
   { bg: 'from-violet-600 to-purple-700', border: 'border-violet-400', label: 'A' },
@@ -181,6 +182,7 @@ export default function QuestionScreen({ question, playerId, questionStartTime }
             </motion.div>
           )}
         </AnimatePresence>
+        <PoweredBySoluto />
       </div>
     </div>
   );

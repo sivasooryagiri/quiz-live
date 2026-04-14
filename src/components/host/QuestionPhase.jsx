@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Timer from '../shared/Timer';
 import { subscribeToQuestionAnswers } from '../../firebase/db';
+import { SolutoHostBar } from '../shared/SolutoBrand';
 
 const OPTION_STYLES = [
   { bg: 'bg-violet-600/80',  border: 'border-violet-400', label: 'A', icon: '▲' },
@@ -83,7 +84,7 @@ export default function QuestionPhase({
         </h2>
       </motion.div>
 
-      {/* Options — horizontal rows */}
+      {/* Options + branding */}
       <div className="flex flex-col gap-3">
         {question.options.map((opt, idx) => {
           const s = OPTION_STYLES[idx];
@@ -103,6 +104,7 @@ export default function QuestionPhase({
           );
         })}
       </div>
+      <SolutoHostBar />
     </div>
   );
 }

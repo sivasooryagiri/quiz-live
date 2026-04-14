@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { SolutoHostBar } from '../shared/SolutoBrand';
 import {
   BarChart,
   Bar,
@@ -135,6 +136,7 @@ export default function ResultsPhase({ question, questionIndex, totalQuestions }
           ✅ Correct answer: {OPTION_LABELS[question.correctAnswer]}. {question.options[question.correctAnswer]}
         </span>
       </motion.div>
+      <SolutoHostBar />
     </div>
   );
 }

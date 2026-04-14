@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Particles from '../shared/Particles';
 import { subscribeToPlayers } from '../../firebase/db';
+import { SolutoHostBar } from '../shared/SolutoBrand';
 
 // Tie-aware rank (players sorted desc by score already)
 const getRank = (players, score) =>
@@ -218,6 +219,8 @@ export default function LeaderboardPhase({ gameState, questions }) {
         {players.length === 0 && (
           <p className="text-center text-white/30 text-lg mt-4">No players yet</p>
         )}
+
+        <SolutoHostBar tagline={isLast} />
       </div>
     </div>
   );

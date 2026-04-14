@@ -1,3 +1,5 @@
+import { PoweredBySoluto } from './SolutoBrand';
+
 export default function LoadingSpinner({ message = 'Loading…' }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628]">
@@ -6,6 +8,9 @@ export default function LoadingSpinner({ message = 'Loading…' }) {
         <div className="absolute inset-0 rounded-full border-4 border-t-brand-400 animate-spin" />
       </div>
       <p className="text-brand-300 text-sm font-medium">{message}</p>
+      <div className="absolute bottom-0 w-full">
+        <PoweredBySoluto />
+      </div>
     </div>
   );
 }

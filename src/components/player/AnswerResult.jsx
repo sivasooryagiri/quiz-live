@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getPlayerAnswer } from '../../firebase/db';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 export default function AnswerResult({ question, playerId }) {
   const [result, setResult] = useState(null);
@@ -123,6 +124,7 @@ export default function AnswerResult({ question, playerId }) {
       >
         Leaderboard coming up…
       </motion.p>
+      <PoweredBySoluto />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { subscribeToPlayers, getPlayerRank } from '../../firebase/db';
+import { PoweredBySoluto } from '../shared/SolutoBrand';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
@@ -98,6 +99,7 @@ export default function PlayerLeaderboard({ playerId, playerName }) {
       <p className="text-center text-white/20 text-xs mt-4">
         Waiting for next question…
       </p>
+      <PoweredBySoluto />
     </div>
   );
 }

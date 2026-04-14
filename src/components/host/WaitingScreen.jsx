@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { subscribeToPlayerCount } from '../../firebase/db';
+import { SolutoHostBar } from '../shared/SolutoBrand';
 
 export default function WaitingScreen({ gameState }) {
   const [playerCount, setPlayerCount] = useState(0);
@@ -92,6 +93,9 @@ export default function WaitingScreen({ gameState }) {
             />
           ))}
         </div>
+      </div>
+      <div className="relative z-10 w-full">
+        <SolutoHostBar />
       </div>
     </div>
   );

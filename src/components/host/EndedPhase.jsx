@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { subscribeToPlayers } from '../../firebase/db';
 import Particles from '../shared/Particles';
+import { SolutoHostBar } from '../shared/SolutoBrand';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
@@ -52,6 +53,9 @@ export default function EndedPhase() {
           })}
         </div>
       </motion.div>
+      <div className="relative z-10 w-full mt-6">
+        <SolutoHostBar tagline />
+      </div>
     </div>
   );
 }
