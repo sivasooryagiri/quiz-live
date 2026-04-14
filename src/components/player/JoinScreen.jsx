@@ -56,7 +56,7 @@ export default function JoinScreen({ onJoin, joining, error, gameTitle = 'QuizLi
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm font-medium">{error}</p>
+            <p className="text-red-400/80 text-xs">{error}</p>
           )}
 
           <motion.button

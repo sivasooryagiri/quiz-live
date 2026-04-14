@@ -24,8 +24,8 @@ export default function usePlayer() {
     } catch (e) {
       setError(
         e.message === 'NAME_TAKEN'
-          ? 'That name is already taken. Choose a different name.'
-          : 'Could not join. Check your connection and try again.'
+          ? 'Name already taken.'
+          : 'Could not join. Try again.'
       );
     } finally {
       setJoining(false);
