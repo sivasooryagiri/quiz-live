@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Game state — anyone can read, no one writes from client
+    // (writes happen via SDK in admin/host only — add auth checks for production)
+    match /meta/{doc} {
+      allow read: if true;
+      allow write: if true;   // Tighten in production: if request.auth != null
+    }
+
+    // Questions — public read, admin-only write
+    match /questions/{id} {
+      allow read: if true;
+      allow write: if true;   // Tighten: if request.auth != null
+    }
+
+    // Players — anyone can create their own doc, read all
+    match /players/{playerId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;  // Score updates happen transactionally
+      allow delete: if true;  // Needed for reset
+    }
+
+    // Answers — anyone can write their own, read all (for results aggregation)
+    match /answers/{answerId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

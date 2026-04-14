@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: #0f0a1e;
+  color: white;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100%;
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+  }
+
+  .glow-box {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Admin form helpers */
+.label {
+  @apply block text-xs font-semibold text-brand-300 mb-1.5 uppercase tracking-wider;
+}
+.input {
+  @apply w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white
+         placeholder-white/30 focus:outline-none focus:border-brand-400 focus:bg-white/15
+         transition-all text-sm;
+}
+.btn-primary {
+  @apply px-5 py-2.5 rounded-xl font-bold text-sm text-white
+         bg-gradient-to-r from-brand-600 to-purple-600
+         hover:from-brand-500 hover:to-purple-500 transition-all
+         disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.btn-ghost {
+  @apply px-5 py-2.5 rounded-xl font-bold text-sm text-white/60
+         glass border border-white/10 hover:text-white hover:bg-white/10 transition-all;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.5); border-radius: 3px; }
