@@ -147,9 +147,9 @@ export default function QuestionScreen({ question, playerId, questionStartTime }
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow shrink-0"
+                    className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center shadow shrink-0"
                   >
-                    <span className="text-xs text-purple-700 font-black">✓</span>
+                    <span className="text-xs text-white font-black">✓</span>
                   </motion.div>
                 )}
               </motion.button>
