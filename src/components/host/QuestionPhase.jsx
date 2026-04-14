@@ -83,17 +83,17 @@ export default function QuestionPhase({
         </h2>
       </motion.div>
 
-      {/* Options grid — no correct answer highlighted */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Options — horizontal rows */}
+      <div className="flex flex-col gap-3">
         {question.options.map((opt, idx) => {
           const s = OPTION_STYLES[idx];
           return (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.08 }}
-              className={`${s.bg} border-2 ${s.border} rounded-2xl p-5 flex items-center gap-4`}
+              className={`${s.bg} border-2 ${s.border} rounded-2xl px-6 py-4 flex items-center gap-5`}
             >
               <span className="text-white/60 text-2xl font-black w-8 shrink-0 text-center">
                 {s.label}
