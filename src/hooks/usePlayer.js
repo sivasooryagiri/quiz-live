@@ -22,7 +22,11 @@ export default function usePlayer() {
       setPlayerId(id);
       setPlayerName(trimmed);
     } catch (e) {
-      setError('Could not join. Check your connection and try again.');
+      setError(
+        e.message === 'NAME_TAKEN'
+          ? 'That name is already taken. Choose a different name.'
+          : 'Could not join. Check your connection and try again.'
+      );
     } finally {
       setJoining(false);
     }

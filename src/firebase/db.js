@@ -159,7 +159,10 @@ export const joinGame = async (name) => {
   const existing = await getDocs(
     query(playersCol(), where('name', '==', name))
   );
-  if (!existing.empty) return existing.docs[0].id;
+  // Name already taken — throw so UI can show error
+  if (!existing.empty) {
+    throw new Error('NAME_TAKEN');
+  }
 
   const ref = doc(playersCol());
   await setDoc(ref, {
