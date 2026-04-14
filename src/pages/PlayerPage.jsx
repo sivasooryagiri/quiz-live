@@ -6,7 +6,7 @@ import { subscribeToQuestions } from '../firebase/db';
 import JoinScreen        from '../components/player/JoinScreen';
 import LobbyScreen       from '../components/player/LobbyScreen';
 import QuestionScreen    from '../components/player/QuestionScreen';
-import AnswerWaiting     from '../components/player/AnswerWaiting';
+import AnswerResult      from '../components/player/AnswerResult';
 import PlayerLeaderboard from '../components/player/PlayerLeaderboard';
 import EndedScreen       from '../components/player/EndedScreen';
 import LoadingSpinner    from '../components/shared/LoadingSpinner';
@@ -68,9 +68,9 @@ export default function PlayerPage() {
           </motion.div>
         )}
 
-        {phase === 'results' && (
-          <motion.div key="results" {...fade}>
-            <AnswerWaiting />
+        {phase === 'results' && currentQ && (
+          <motion.div key={`ar-${gameState.currentQuestionIndex}`} {...fade}>
+            <AnswerResult question={currentQ} playerId={playerId} />
           </motion.div>
         )}
 
