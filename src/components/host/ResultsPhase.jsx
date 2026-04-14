@@ -43,10 +43,9 @@ export default function ResultsPhase({ question, questionIndex, totalQuestions }
   const total = answers.length || 1;
 
   const chartData = question.options.map((opt, i) => ({
-    name:      `${OPTION_LABELS[i]}. ${opt}`,
-    count:     counts[i],
-    pct:       Math.round((counts[i] / total) * 100),
-    correct:   i === question.correctAnswer,
+    name:    `${OPTION_LABELS[i]}. ${opt}`,
+    count:   counts[i],
+    correct: i === question.correctAnswer,
   }));
 
   return (
@@ -110,13 +109,14 @@ export default function ResultsPhase({ question, questionIndex, totalQuestions }
                 <Cell
                   key={idx}
                   fill={entry.correct ? '#22c55e' : '#ef4444'}
-                  opacity={0.9}
+                  opacity={entry.correct ? 1 : 0.65}
+                  style={entry.correct ? { filter: 'drop-shadow(0 0 10px #22c55e)' } : {}}
                 />
               ))}
               <LabelList
-                dataKey="pct"
+                dataKey="count"
                 position="right"
-                formatter={(val) => `${val}%`}
+                formatter={(val) => `${val} ${val === 1 ? 'person' : 'people'}`}
                 style={{ fill: 'white', fontSize: 16, fontWeight: 700 }}
               />
             </Bar>

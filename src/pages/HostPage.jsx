@@ -26,15 +26,6 @@ export default function HostPage() {
     return unsub;
   }, []);
 
-  // Auto-advance results → leaderboard after 5 seconds
-  useEffect(() => {
-    if (!gameState || gameState.phase !== 'results') return;
-    const id = setTimeout(() => {
-      advanceToLeaderboard().catch(console.error);
-    }, 5000);
-    return () => clearTimeout(id);
-  }, [gameState?.phase, gameState?.currentQuestionIndex]);
-
   // Auto-advance question → results when timer expires.
   // Transaction ensures only one client advances even if multiple host tabs are open.
   useEffect(() => {
