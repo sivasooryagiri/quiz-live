@@ -3,10 +3,10 @@ export default function AboutPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628] flex items-center justify-center px-6">
       <div className="max-w-lg w-full space-y-6 py-12">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => window.close()}
           className="text-white/30 hover:text-white/60 transition-colors text-sm"
         >
-          ← Back
+          ← Close
         </button>
 
         {/* Builder */}
