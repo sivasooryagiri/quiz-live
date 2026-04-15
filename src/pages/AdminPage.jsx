@@ -17,6 +17,15 @@ const TABS = [
 function AboutCorner() {
   return (
     <div className="fixed bottom-4 right-4 z-50 text-right max-w-[220px]">
+      <div className="flex justify-end mb-1.5">
+        <a href="https://deadtechguy.fun" target="_blank" rel="noopener noreferrer">
+          <img
+            src="/builder.jpg"
+            alt="SivaSoorya G.R"
+            className="w-8 h-8 rounded-full object-cover opacity-30 hover:opacity-60 transition-opacity"
+          />
+        </a>
+      </div>
       <p className="text-white/20 text-xs leading-relaxed">
         Built by{' '}
         <a
