@@ -218,6 +218,8 @@ export default function LeaderboardPhase({ gameState, questions }) {
         {players.length === 0 && (
           <p className="text-center text-white/30 text-lg mt-4">No players yet</p>
         )}
+
+        <p className="text-center text-white/30 text-sm font-medium mt-4">deadtechguy.fun</p>
       </div>
     </div>
   );
