@@ -118,6 +118,15 @@ export default function JoinScreen({ onJoin, joining, error, suggested, onClearS
           Min 2 characters · Max 20 characters
         </p>
       </motion.div>
+
+      <a
+        href="https://deadtechguy.fun"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 left-0 right-0 text-center text-white/20 text-xs hover:text-white/40 transition-colors"
+      >
+        Built by DeadTechGuy
+      </a>
     </div>
   );
 }
