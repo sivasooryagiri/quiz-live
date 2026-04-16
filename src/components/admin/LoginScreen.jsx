@@ -10,15 +10,10 @@ export default function LoginScreen({ onLogin }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    const email = import.meta.env.VITE_ADMIN_EMAIL;
-    if (!email) {
-      setError('VITE_ADMIN_EMAIL is not set in .env');
-      return;
-    }
     setBusy(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, 'admin@quizlive.internal', password);
       onLogin();
     } catch {
       setError('Incorrect password.');

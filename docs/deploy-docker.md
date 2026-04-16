@@ -25,8 +25,8 @@ cd quizlive
 
 1. In Firebase console → **Authentication → Get started**
 2. Click **Email/Password** → Enable → Save
-3. Go to **Users → Add user** → enter an email and a strong password
-4. These go into `.env` as `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD`
+3. Go to **Users → Add user** → use email `admin@quizlive.internal` and a strong password of your choice
+4. Remember that password — you will type it into the admin login screen (never stored in any file)
 
 ---
 
@@ -46,8 +46,6 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000000000000:web:xxxx
 
-VITE_ADMIN_EMAIL=the_email_you_created_in_firebase
-VITE_ADMIN_PASSWORD=the_password_you_set_in_firebase
 VITE_JOIN_URL=http://localhost:3000
 ```
 

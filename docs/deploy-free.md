@@ -46,8 +46,8 @@ Firebase handles the real-time database, Vercel serves the frontend.
 **Enable Authentication:**
 1. Left sidebar → **Authentication → Get started**
 2. Click **Email/Password** → Enable → Save
-3. Go to **Users → Add user** → enter an email and a strong password
-4. These go into Vercel as `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in Step 4
+3. Go to **Users → Add user** → use email `admin@quizlive.internal` and a strong password of your choice
+4. Remember that password — you'll type it into the admin login screen (it is never stored in any file)
 
 ---
 
@@ -92,8 +92,6 @@ git push -u origin main
 | `VITE_FIREBASE_STORAGE_BUCKET` | `your-project.appspot.com` |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | from Firebase config |
 | `VITE_FIREBASE_APP_ID` | from Firebase config |
-| `VITE_ADMIN_EMAIL` | the email you created in Firebase Auth |
-| `VITE_ADMIN_PASSWORD` | the password you set in Firebase Auth |
 | `VITE_JOIN_URL` | leave blank for now (fill after first deploy) |
 
 5. Click **Deploy**

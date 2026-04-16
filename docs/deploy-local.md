@@ -65,8 +65,6 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000000000000:web:xxxx
 
-VITE_ADMIN_EMAIL=the_email_you_created_in_firebase
-VITE_ADMIN_PASSWORD=the_password_you_set_in_firebase
 VITE_JOIN_URL=http://localhost:5173
 ```
 
