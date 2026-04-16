@@ -63,8 +63,8 @@ npm -v
 ## Step 4 — Clone and build the app
 
 ```bash
-git clone https://github.com/sivasooryagiri/quiz-live.git
-cd quiz-live
+git clone https://github.com/sivasooryagiri/quizlive.git
+cd quizlive
 npm install
 ```
 

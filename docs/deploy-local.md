@@ -15,8 +15,8 @@ Run QuizLive on your own machine and let anyone on the same Wi-Fi join — no in
 ## Step 1 — Clone & install
 
 ```bash
-git clone https://github.com/sivasooryagiri/quiz-live.git
-cd quiz-live
+git clone https://github.com/sivasooryagiri/quizlive.git
+cd quizlive
 npm install
 ```
 

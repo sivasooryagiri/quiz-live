@@ -15,8 +15,8 @@ Good for self-hosting on a VPS, a home server, or keeping things tidy on your ow
 ## Step 1 — Clone the repo
 
 ```bash
-git clone https://github.com/sivasooryagiri/quiz-live.git
-cd quiz-live
+git clone https://github.com/sivasooryagiri/quizlive.git
+cd quizlive
 ```
 
 ---

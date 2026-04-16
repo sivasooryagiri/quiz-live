@@ -64,8 +64,8 @@ Pick the setup that fits your situation:
 ### ⚡ Quickstart (localhost)
 
 ```bash
-git clone https://github.com/sivasooryagiri/quiz-live.git
-cd quiz-live
+git clone https://github.com/sivasooryagiri/quizlive.git
+cd quizlive
 npm install
 cp .env.example .env
 # fill in your Firebase config
@@ -81,8 +81,8 @@ Open `http://localhost:5173`
 ### 🐳 Docker
 
 ```bash
-git clone https://github.com/sivasooryagiri/quiz-live.git
-cd quiz-live
+git clone https://github.com/sivasooryagiri/quizlive.git
+cd quizlive
 cp .env.example .env
 # fill in your Firebase config in .env
 
