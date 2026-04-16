@@ -7,21 +7,20 @@ export default function AnswerResult({ question, playerId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch answer; if null (race: results phase flipped before submitAnswer finished),
-    // retry once after 2s to catch the late-arriving write.
+    let t;
     getPlayerAnswer(question.id, playerId).then((r) => {
       if (r !== null) {
         setResult(r);
         setLoading(false);
       } else {
-        const t = setTimeout(() => {
+        t = setTimeout(() => {
           getPlayerAnswer(question.id, playerId)
             .then(setResult)
             .finally(() => setLoading(false));
         }, 2000);
-        return () => clearTimeout(t);
       }
     });
+    return () => clearTimeout(t);
   }, [question.id, playerId]);
 
   if (loading) {
