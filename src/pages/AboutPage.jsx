@@ -63,7 +63,7 @@ export default function AboutPage() {
         {/* Links */}
         <div className="flex gap-6 pt-2">
           <a
-            href="https://github.com/sivasooryagiri/quiz-live"
+            href="https://github.com/sivasooryagiri/quizlive"
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/30 text-sm hover:text-white/70 transition-colors"

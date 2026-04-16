@@ -31,7 +31,7 @@
 ## 2. Local Setup
 
 ```bash
-cd quiz-app
+cd quizlive
 cp .env.example .env
 # Edit .env and paste your Firebase values
 npm install
@@ -57,6 +57,7 @@ service cloud.firestore {
     match /questions/{id}    { allow read: if true; allow write: if true; }
     match /players/{id}      { allow read, write: if true; }
     match /answers/{id}      { allow read, write: if true; }
+    match /sessions/{id}     { allow read, write: if true; }
   }
 }
 ```
@@ -92,7 +93,7 @@ vercel --prod
 ## 5. Event Day Checklist
 
 1. Open `/admin` on your laptop → add all questions
-2. Click **Host / QR tab** → set `VITE_JOIN_URL` to your Vercel URL
+2. Confirm `VITE_JOIN_URL` in your `.env` matches your Vercel URL
 3. Open `/host` on the projector (full-screen the browser tab)
 4. Players scan the QR code on screen or visit the URL
 5. In admin → **Game Control** → click **Start Quiz**

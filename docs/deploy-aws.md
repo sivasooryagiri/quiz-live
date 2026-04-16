@@ -131,7 +131,7 @@ App is now live at `http://<your-ec2-public-ip>:3000`
 
 ```bash
 sudo npm install -g pm2
-pm2 start "serve -s dist -l 3000" --name quiz-live
+pm2 start "serve -s dist -l 3000" --name quizlive
 pm2 save
 pm2 startup
 ```
@@ -146,7 +146,7 @@ If you have a domain:
 
 1. In your DNS provider, add an **A record** pointing to your EC2 public IP
 2. Update `.env` → `VITE_JOIN_URL=http://yourdomain.com` (or `https://` if you add SSL below)
-3. Rebuild: `npm run build && pm2 restart quiz-live`
+3. Rebuild: `npm run build && pm2 restart quizlive`
 
 For HTTPS (recommended if using a domain):
 
@@ -191,7 +191,7 @@ Once nginx handles port 80/443, update `.env`:
 VITE_JOIN_URL=https://yourdomain.com
 ```
 
-Rebuild and restart: `npm run build && pm2 restart quiz-live`
+Rebuild and restart: `npm run build && pm2 restart quizlive`
 
 ---
 
