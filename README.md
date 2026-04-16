@@ -117,9 +117,11 @@ All deployments use Firebase Firestore as the database — capacity depends on y
 | Firebase plan | Concurrent players | Cost |
 |---------------|--------------------|------|
 | Spark (free) | ~80–100 | $0 |
-| Blaze (pay-as-you-go) | 500+ | ~$5–7/month at heavy use (3 sessions/day, 500 players) |
+| Blaze (pay-as-you-go) | 500+ | ~$5–7/month at heavy use |
 
-> The frontend host (Local / Docker / AWS / Vercel) only serves static files — it has no real player limit. The bottleneck is always Firestore concurrent connections.
+> The frontend host (Local / Docker / AWS / Vercel) only serves static files — it has no real player limit. The bottleneck is always Firestore reads/writes.
+
+**Need heavy usage?** → See [FIREBASE-COSTS.md](FIREBASE-COSTS.md) for a breakdown of free-tier sessions by player count × number of questions, plus Blaze pricing bands.
 
 ---
 
