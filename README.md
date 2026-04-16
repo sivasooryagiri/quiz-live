@@ -38,7 +38,7 @@ Pick the setup that fits your situation:
 | [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, events on same Wi-Fi | Free |
 | [☁️ AWS EC2](docs/deploy-aws.md) | Public quiz, anyone can join from anywhere | Free tier |
 | [🔥 Firebase + Vercel](docs/deploy-free.md) | Easiest cloud setup, 80–100 players | Free |
-| [🐳 Docker](#docker) | Self-hosted, clean environment | Free |
+| [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | Free |
 
 ---
 
