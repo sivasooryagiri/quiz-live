@@ -1,4 +1,4 @@
-# 🎯 QuizLive — Free Kahoot & Slido Alternative
+# <img src="public/logo.svg" width="36" height="36" alt="QuizLive" style="vertical-align:middle"> QuizLive — Free Kahoot & Slido Alternative
 
 **Free. Open source. Fully yours.**
 
