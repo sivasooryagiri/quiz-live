@@ -6,12 +6,14 @@ import LoginScreen     from '../components/admin/LoginScreen';
 import QuestionEditor  from '../components/admin/QuestionEditor';
 import GameControl     from '../components/admin/GameControl';
 import HostControl     from '../components/admin/HostControl';
+import SessionHistory  from '../components/admin/SessionHistory';
 import LoadingSpinner  from '../components/shared/LoadingSpinner';
 
 const TABS = [
   { id: 'questions', label: '📝 Questions' },
   { id: 'game',      label: '🎮 Game Control' },
   { id: 'host',      label: '🖥 Host / QR' },
+  { id: 'history',   label: '📋 History' },
 ];
 
 function AboutCorner() {
@@ -108,6 +110,9 @@ export default function AdminPage() {
           )}
           {tab === 'host' && (
             <HostControl gameState={gameState} />
+          )}
+          {tab === 'history' && (
+            <SessionHistory />
           )}
         </motion.div>
       </main>

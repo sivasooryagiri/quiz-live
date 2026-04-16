@@ -43,6 +43,7 @@ const gameRef      = doc(db, 'meta', 'gameState');
 const questionsCol = () => collection(db, 'questions');
 const playersCol   = () => collection(db, 'players');
 const answersCol   = () => collection(db, 'answers');
+const sessionsCol  = () => collection(db, 'sessions');
 
 // ─── Scoring ──────────────────────────────────────────────────
 export const calcScore = (isCorrect, timeTaken, timer) => {
@@ -79,6 +80,8 @@ export const startQuiz = () =>
     phase: 'question',
     currentQuestionIndex: 0,
     questionStartTime: serverTimestamp(),
+    startedAt: serverTimestamp(),
+    sessionSaved: false,
   });
 
 /** Idempotent via transaction — safe for multiple host tabs. */
@@ -263,3 +266,39 @@ export const getPlayerRank = (players, playerId) => {
   const myScore = players.find((p) => p.id === playerId)?.score ?? 0;
   return players.filter((p) => p.score > myScore).length + 1;
 };
+
+// ─── Sessions (leaderboard history) ──────────────────────────
+/**
+ * Saves a session snapshot when quiz ends.
+ * Transaction-guarded: only saves once even with multiple host tabs open.
+ */
+export const saveSession = async (gameState) => {
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(gameRef);
+    if (!snap.exists() || snap.data().sessionSaved) return;
+
+    const playerSnap = await getDocs(query(playersCol(), orderBy('score', 'desc')));
+    const players = playerSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    const ranked = players.map((p) => ({
+      name:  p.name,
+      score: p.score,
+      rank:  players.filter((x) => x.score > p.score).length + 1,
+    }));
+
+    const sessionRef = doc(sessionsCol());
+    tx.set(sessionRef, {
+      title:     gameState.title ?? 'QuizLive',
+      startedAt: gameState.startedAt ?? null,
+      endedAt:   serverTimestamp(),
+      players:   ranked,
+    });
+    tx.update(gameRef, { sessionSaved: true });
+  });
+};
+
+export const subscribeToSessions = (cb) =>
+  onSnapshot(
+    query(sessionsCol(), orderBy('endedAt', 'desc')),
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+  );

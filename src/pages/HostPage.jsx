@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import useGameState from '../hooks/useGameState';
-import { subscribeToQuestions, advanceToResults, advanceToLeaderboard } from '../firebase/db';
+import { subscribeToQuestions, advanceToResults, advanceToLeaderboard, saveSession } from '../firebase/db';
 import WaitingScreen    from '../components/host/WaitingScreen';
 import QuestionPhase    from '../components/host/QuestionPhase';
 import ResultsPhase     from '../components/host/ResultsPhase';
@@ -20,12 +20,21 @@ const fade = {
 export default function HostPage() {
   const { gameState, loading } = useGameState();
   const [questions, setQuestions] = useState([]);
-  const timerRef = useRef(null);
+  const timerRef      = useRef(null);
+  const sessionSaving = useRef(false);
 
   useEffect(() => {
     const unsub = subscribeToQuestions(setQuestions);
     return unsub;
   }, []);
+
+  // Save session snapshot when quiz ends (once per session).
+  useEffect(() => {
+    if (!gameState || gameState.phase !== 'ended') return;
+    if (gameState.sessionSaved || sessionSaving.current) return;
+    sessionSaving.current = true;
+    saveSession(gameState).catch(console.error);
+  }, [gameState?.phase, gameState?.sessionSaved]);
 
   // Auto-advance question → results when timer expires.
   // Transaction ensures only one client advances even if multiple host tabs are open.

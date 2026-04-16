@@ -28,5 +28,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    // Sessions — written by host on quiz end, read by admin
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
