@@ -19,13 +19,23 @@ function duration(start, end) {
   return `${mins} min`;
 }
 
+// Escape a value for CSV: quote-wrap, double internal quotes,
+// and prefix Excel-formula triggers (= + - @) with an apostrophe so they
+// can't execute as formulas when opened in spreadsheet software.
+function csvEscape(val) {
+  const s = String(val ?? '');
+  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
 function downloadCSV(session) {
   const rows = [
     ['Rank', 'Name', 'Score'],
     ...session.players.map((p) => [p.rank, p.name, p.score]),
   ];
-  const csv  = rows.map((r) => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const csv  = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
+  // Prepend BOM so Excel reads UTF-8 names (emojis, accents) correctly.
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;

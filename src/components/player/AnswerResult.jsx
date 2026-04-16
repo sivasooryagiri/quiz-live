@@ -1,26 +1,25 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getPlayerAnswer } from '../../firebase/db';
+import { subscribeToPlayerAnswer } from '../../firebase/db';
 
 export default function AnswerResult({ question, playerId }) {
-  const [result, setResult] = useState(null);
+  const [result,  setResult]  = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Listen to the answer doc in real-time. Handles slow submissions:
+  // even if the answer arrives 5s after results phase started, UI updates.
   useEffect(() => {
-    let t;
-    getPlayerAnswer(question.id, playerId).then((r) => {
-      if (r !== null) {
+    let settled = false;
+    const unsub = subscribeToPlayerAnswer(question.id, playerId, (r) => {
+      if (r) {
         setResult(r);
         setLoading(false);
-      } else {
-        t = setTimeout(() => {
-          getPlayerAnswer(question.id, playerId)
-            .then(setResult)
-            .finally(() => setLoading(false));
-        }, 2000);
+        settled = true;
       }
     });
-    return () => clearTimeout(t);
+    // Give up showing spinner after 4s — assume no answer was submitted.
+    const t = setTimeout(() => { if (!settled) setLoading(false); }, 4000);
+    return () => { unsub(); clearTimeout(t); };
   }, [question.id, playerId]);
 
   if (loading) {

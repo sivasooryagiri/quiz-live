@@ -111,11 +111,11 @@ export default function LeaderboardPhase({ gameState, questions }) {
     return unsub;
   }, []);
 
-  const topTen = players.slice(0, 50);
+  const top50 = players.slice(0, 50);
   const isLast = (gameState?.currentQuestionIndex ?? 0) >= (questions.length - 1);
 
   // Attach display rank to each player (tie-aware)
-  const ranked = topTen.map((p) => ({
+  const ranked = top50.map((p) => ({
     ...p,
     displayRank: getRank(players, p.score),
   }));
@@ -125,7 +125,7 @@ export default function LeaderboardPhase({ gameState, questions }) {
                     bg-gradient-to-b from-[#0f0a1e] via-[#160b2e] to-[#0a1628]">
 
       {/* Falling confetti */}
-      {topTen.length > 0 && <Particles count={28} />}
+      {top50.length > 0 && <Particles count={28} />}
 
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -161,12 +161,12 @@ export default function LeaderboardPhase({ gameState, questions }) {
         </motion.div>
 
         {/* Podium — top 3 */}
-        {topTen.length > 0 && (
+        {top50.length > 0 && (
           <div className="flex justify-center items-end gap-4 relative">
             {PODIUM_ORDER.map((rankIdx, vi) => (
               <PodiumSlot
                 key={rankIdx}
-                player={topTen[rankIdx]}
+                player={top50[rankIdx]}
                 style={PODIUM_STYLES[vi]}
                 delay={0.1 + vi * 0.15}
               />
@@ -175,10 +175,10 @@ export default function LeaderboardPhase({ gameState, questions }) {
         )}
 
         {/* Ranks 4+ */}
-        {topTen.length > 3 && (
+        {top50.length > 3 && (
           <div className="flex flex-col gap-2 max-w-2xl mx-auto w-full">
             <AnimatePresence>
-              {topTen.slice(3).map((p, i) => (
+              {top50.slice(3).map((p, i) => (
                 <motion.div
                   key={p.id}
                   layout

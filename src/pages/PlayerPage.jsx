@@ -10,6 +10,7 @@ import AnswerResult      from '../components/player/AnswerResult';
 import PlayerLeaderboard from '../components/player/PlayerLeaderboard';
 import EndedScreen       from '../components/player/EndedScreen';
 import LoadingSpinner    from '../components/shared/LoadingSpinner';
+import ErrorScreen       from '../components/shared/ErrorScreen';
 
 const fade = {
   initial:    { opacity: 0, y: 16 },
@@ -19,7 +20,7 @@ const fade = {
 };
 
 export default function PlayerPage() {
-  const { gameState, loading }                         = useGameState();
+  const { gameState, loading, error: gameError }       = useGameState();
   const { playerId, playerName, join, joining, error, suggested, setSuggested, setError, verified } = usePlayer();
   const [questions, setQuestions]                      = useState([]);
 
@@ -28,6 +29,7 @@ export default function PlayerPage() {
     return unsub;
   }, []);
 
+  if (gameError) return <ErrorScreen message={gameError} />;
   if (loading || !verified) return <LoadingSpinner />;
 
   if (!playerId) {

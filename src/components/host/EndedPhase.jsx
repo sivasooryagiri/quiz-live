@@ -31,9 +31,12 @@ export default function EndedPhase() {
         <p className="text-brand-300 text-2xl mb-12">Thanks everyone for playing!</p>
 
         <div className="flex justify-center items-end gap-6">
-          {[topThree[1], topThree[0], topThree[2]].map((p, vi) => {
+          {[
+            { p: topThree[1], rank: 1 }, // 2nd place left
+            { p: topThree[0], rank: 0 }, // 1st place center
+            { p: topThree[2], rank: 2 }, // 3rd place right
+          ].map(({ p, rank }, vi) => {
             if (!p) return <div key={vi} className="w-44" />;
-            const rank    = topThree.indexOf(p);
             const heights = ['h-36', 'h-52', 'h-28'];
             return (
               <motion.div

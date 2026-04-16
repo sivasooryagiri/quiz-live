@@ -2,13 +2,15 @@
   <img src="public/logo.svg" width="80" alt="QuizLive logo" />
 </p>
 
-# QuizLive — Open Source Real-Time Quiz App
+# QuizLive — Open Source Real-Time Quiz App (Kahoot / Slido / Mentimeter Alternative)
 
-**Open source. Self-hosted. No subscriptions.**
+**Open source. Self-hosted. No subscriptions. No player accounts. Unlimited questions.**
 
-QuizLive is an open-source real-time multiplayer quiz app. Run it on your laptop for a classroom, deploy it on a server for a public event, or self-host it however you want. You own the code, you own the data.
+QuizLive is a free, open-source, real-time multiplayer quiz and trivia platform built with React and Firebase. Run it on your laptop for a classroom, deploy it on a server for a public event, or self-host it however you want. You own the code, you own the data, you keep the players.
 
-> Looking for an **open source Kahoot alternative**? A **self-hosted quiz platform** you actually control? This is it.
+> Looking for an **open source Kahoot alternative**? A **free Slido alternative**? A **self-hosted Mentimeter** for classrooms, conferences, town halls, or trivia nights? A **live polling tool** without a paywall? This is it.
+
+**Use it for:** classroom quizzes · school trivia · corporate town halls · conference Q&A · pub trivia · live polling · audience response · community quiz nights · onboarding games · workshop icebreakers.
 
 ![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Firestore-ff6f00?style=flat-square&logo=firebase&logoColor=white)
@@ -110,11 +112,14 @@ Open `http://localhost:3000`
 
 ## 👥 Capacity
 
-| Setup | Concurrent players | Cost |
-|-------|--------------------|------|
-| Local / Docker / AWS | Unlimited | Your server only |
-| Firebase Spark (free) | ~100 | $0 |
-| Firebase Blaze (pay-as-you-go) | 500+ | ~$5–7/month at heavy use |
+All deployments use Firebase Firestore as the database — capacity depends on your Firebase plan, not where the frontend is hosted.
+
+| Firebase plan | Concurrent players | Cost |
+|---------------|--------------------|------|
+| Spark (free) | ~80–100 | $0 |
+| Blaze (pay-as-you-go) | 500+ | ~$5–7/month at heavy use (3 sessions/day, 500 players) |
+
+> The frontend host (Local / Docker / AWS / Vercel) only serves static files — it has no real player limit. The bottleneck is always Firestore concurrent connections.
 
 ---
 
@@ -174,3 +179,7 @@ Players type any word during a session. Words appear as floating bubbles on the 
 Built by [SivaSoorya G.R](https://deadtechguy.fun) — ML/DL creator, co-founder of Soluto. Opened this up so anyone can run a quiz without a paywall or a vendor in the way.
 
 → [deadtechguy.fun](https://deadtechguy.fun) · [GitHub](https://github.com/sivasooryagiri) · 📧 [dtg@soluto.in](mailto:dtg@soluto.in)
+
+---
+
+<sub>**Topics:** quiz · trivia · kahoot-alternative · slido-alternative · mentimeter-alternative · open-source-quiz · self-hosted · real-time · multiplayer · classroom · live-polling · audience-response · firebase · react · vite · tailwindcss · free-quiz-app · no-subscription</sub>

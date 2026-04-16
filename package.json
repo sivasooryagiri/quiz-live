@@ -2,6 +2,33 @@
   "name": "quizlive",
   "private": true,
   "version": "1.0.0",
+  "description": "Open source real-time multiplayer quiz app — self-hosted Kahoot, Slido, and Mentimeter alternative. No subscriptions, no player accounts, unlimited questions. Built with React, Vite, Tailwind, and Firebase.",
+  "keywords": [
+    "quiz",
+    "trivia",
+    "kahoot-alternative",
+    "slido-alternative",
+    "mentimeter-alternative",
+    "real-time-quiz",
+    "multiplayer-quiz",
+    "open-source",
+    "self-hosted",
+    "live-polling",
+    "audience-response",
+    "classroom",
+    "firebase",
+    "react",
+    "vite",
+    "tailwindcss",
+    "free-quiz-app"
+  ],
+  "homepage": "https://github.com/sivasooryagiri/quizlive",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sivasooryagiri/quizlive.git"
+  },
+  "author": "SivaSoorya G.R <dtg@soluto.in> (https://deadtechguy.fun)",
+  "license": "SEE LICENSE IN README.md",
   "type": "module",
   "scripts": {
     "dev": "vite",

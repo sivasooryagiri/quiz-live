@@ -15,10 +15,10 @@ export default function PlayerLeaderboard({ playerId, playerName }) {
   // Proper rank accounting for ties
   const myRank  = players.length ? getPlayerRank(players, playerId) : null;
   const myScore = players.find((p) => p.id === playerId)?.score ?? 0;
-  const topTen  = players.slice(0, 50);
+  const top50  = players.slice(0, 50);
 
   // Build display ranks for each player (ties share same rank)
-  const withRanks = topTen.map((p) => ({
+  const withRanks = top50.map((p) => ({
     ...p,
     rank: players.filter((x) => x.score > p.score).length + 1,
   }));

@@ -68,9 +68,11 @@ export const initGameState = async () => {
   }
 };
 
-export const subscribeToGameState = (cb) =>
-  onSnapshot(gameRef, (snap) =>
-    cb(snap.exists() ? { id: snap.id, ...snap.data() } : null)
+export const subscribeToGameState = (cb, onError) =>
+  onSnapshot(
+    gameRef,
+    (snap) => cb(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+    onError
   );
 
 export const updateGameState = (data) => updateDoc(gameRef, data);
@@ -84,7 +86,7 @@ export const startQuiz = () =>
     sessionSaved: false,
   });
 
-/** Idempotent via transaction — safe for multiple host tabs. */
+/** Idempotent via transaction — safe for multiple admin tabs. */
 export const advanceToResults = () =>
   runTransaction(db, async (tx) => {
     const snap = await tx.get(gameRef);
@@ -115,6 +117,7 @@ export const resetGame = async () => {
     phase: 'waiting',
     currentQuestionIndex: 0,
     questionStartTime: null,
+    sessionSaved: false,
   });
   const [players, answers] = await Promise.all([
     getDocs(playersCol()),
@@ -133,15 +136,21 @@ export const subscribeToQuestions = (cb) =>
   );
 
 export const addQuestion = async (q) => {
-  const snap = await getDocs(
-    query(questionsCol(), orderBy('order', 'desc'), limit(1))
-  );
-  const nextOrder = snap.empty ? 0 : snap.docs[0].data().order + 1;
-  return addDoc(questionsCol(), {
-    ...q,
-    order: nextOrder,
-    createdAt: serverTimestamp(),
+  // Use a transaction so two admin tabs adding simultaneously can't both pick
+  // the same `order` value. Read max order, write new doc with order+1, atomically.
+  const newRef = doc(questionsCol());
+  await runTransaction(db, async (tx) => {
+    const snap = await getDocs(
+      query(questionsCol(), orderBy('order', 'desc'), limit(1))
+    );
+    const nextOrder = snap.empty ? 0 : snap.docs[0].data().order + 1;
+    tx.set(newRef, {
+      ...q,
+      order: nextOrder,
+      createdAt: serverTimestamp(),
+    });
   });
+  return newRef;
 };
 
 export const updateQuestion = (id, data) =>
@@ -159,7 +168,13 @@ export const reorderQuestions = async (orderedIds) => {
 };
 
 // ─── Players ──────────────────────────────────────────────────
-export const joinGame = async (name) => {
+export const joinGame = async (rawName) => {
+  // Server-side name validation (UI also enforces this, but block bypass attempts)
+  const name = String(rawName ?? '').trim();
+  if (name.length < 2 || name.length > 20) {
+    throw new Error('INVALID_NAME');
+  }
+
   // Fetch all players to do case-insensitive check (fine for ≤50 players)
   const allSnap  = await getDocs(playersCol());
   const allNames = allSnap.docs.map((d) => d.data().name.toLowerCase());
@@ -251,6 +266,12 @@ export const getPlayerAnswer = (questionId, playerId) =>
     s.exists() ? s.data() : null
   );
 
+/** Real-time listener for one player's answer to one question. */
+export const subscribeToPlayerAnswer = (questionId, playerId, cb) =>
+  onSnapshot(doc(db, 'answers', `${questionId}_${playerId}`), (s) =>
+    cb(s.exists() ? s.data() : null)
+  );
+
 export const subscribeToQuestionAnswers = (questionId, cb) =>
   onSnapshot(
     query(answersCol(), where('questionId', '==', questionId)),
@@ -299,6 +320,9 @@ export const saveSession = async (gameState) => {
 
 export const subscribeToSessions = (cb) =>
   onSnapshot(
-    query(sessionsCol(), orderBy('endedAt', 'desc')),
+    // Cap at the most recent 50 sessions so the history page stays fast
+    // even after years of use. Older sessions remain in Firestore (admin
+    // can still query them directly if ever needed).
+    query(sessionsCol(), orderBy('endedAt', 'desc'), limit(50)),
     (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
   );

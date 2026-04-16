@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import useGameState    from '../hooks/useGameState';
-import { subscribeToQuestions, subscribeToPlayers, saveSession } from '../firebase/db';
+import { subscribeToQuestions, subscribeToPlayers, saveSession, advanceToResults } from '../firebase/db';
 import LoginScreen     from '../components/admin/LoginScreen';
 import QuestionEditor  from '../components/admin/QuestionEditor';
 import GameControl     from '../components/admin/GameControl';
 import HostControl     from '../components/admin/HostControl';
 import SessionHistory  from '../components/admin/SessionHistory';
 import LoadingSpinner  from '../components/shared/LoadingSpinner';
+import ErrorScreen     from '../components/shared/ErrorScreen';
 
 const TABS = [
   { id: 'questions', label: '📝 Questions' },
@@ -44,8 +45,9 @@ export default function AdminPage() {
   const [tab,         setTab]         = useState('game');
   const [questions,   setQuestions]   = useState([]);
   const [players,     setPlayers]     = useState([]);
-  const { gameState, loading }        = useGameState();
+  const { gameState, loading, error } = useGameState();
   const sessionSaving                 = useRef(false);
+  const advanceTimerRef               = useRef(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -75,8 +77,38 @@ export default function AdminPage() {
     if (gameState?.phase === 'waiting') sessionSaving.current = false;
   }, [gameState?.phase]);
 
+  // Auto-advance question → results when timer expires.
+  // Lives in admin (not host) so meta writes stay admin-authenticated.
+  // Transaction inside advanceToResults makes this multi-tab safe.
+  useEffect(() => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (!authed || !gameState || gameState.phase !== 'question') return;
+    if (!gameState.questionStartTime) return;
+    const currentQ = questions[gameState.currentQuestionIndex];
+    if (!currentQ) return;
+
+    const startMs =
+      gameState.questionStartTime?.toMillis?.() ??
+      (gameState.questionStartTime?.seconds ?? 0) * 1000;
+    const elapsed   = (Date.now() - startMs) / 1000;
+    const remaining = Math.max(0, (currentQ.timer ?? 15) - elapsed);
+
+    advanceTimerRef.current = setTimeout(() => {
+      advanceToResults().catch(console.error);
+    }, remaining * 1000);
+
+    return () => clearTimeout(advanceTimerRef.current);
+  }, [
+    authed,
+    gameState?.phase,
+    gameState?.currentQuestionIndex,
+    gameState?.questionStartTime?.seconds,
+    questions,
+  ]);
+
   if (authLoading) return <LoadingSpinner />;
   if (!authed)     return <LoginScreen onLogin={() => {}} />;
+  if (error)       return <ErrorScreen message={error} />;
   if (loading)     return <LoadingSpinner />;
 
   return (

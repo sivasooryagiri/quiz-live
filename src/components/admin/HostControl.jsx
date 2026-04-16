@@ -13,8 +13,13 @@ export default function HostControl({ gameState }) {
   const isQuestioning = gameState?.phase === 'question';
   const showQR        = gameState?.showQR ?? false;
 
+  // QR preview must reflect the SAVED url, not the unsaved input — otherwise
+  // admins type a new URL, see the QR update, and assume it's already live.
+  const savedJoinUrl = gameState?.joinUrl || window.location.origin;
+  const dirty        = joinUrl !== savedJoinUrl || title !== (gameState?.title ?? 'QuizLive');
+
   const copyUrl = () => {
-    navigator.clipboard.writeText(joinUrl);
+    navigator.clipboard.writeText(savedJoinUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -113,17 +118,24 @@ export default function HostControl({ gameState }) {
 
       {/* QR Preview */}
       <div className="glass rounded-2xl p-5 flex flex-col items-center gap-4">
-        <p className="text-xs text-white/40 uppercase tracking-wider font-semibold self-start">QR Preview</p>
+        <div className="self-start flex items-center gap-2">
+          <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">QR Preview</p>
+          {dirty && (
+            <span className="text-[10px] text-amber-300 bg-amber-500/15 border border-amber-500/30 rounded px-1.5 py-0.5 font-bold">
+              Unsaved — click Save Settings
+            </span>
+          )}
+        </div>
         <div className="glass-strong rounded-2xl p-4">
           <QRCodeSVG
-            value={joinUrl || window.location.origin}
+            value={savedJoinUrl}
             size={160}
             bgColor="transparent"
             fgColor="#ffffff"
             level="M"
           />
         </div>
-        <p className="text-brand-300 text-sm font-medium">{joinUrl}</p>
+        <p className="text-brand-300 text-sm font-medium">{savedJoinUrl}</p>
         <button
           onClick={copyUrl}
           className="w-full py-2 rounded-xl glass border border-white/10 text-xs font-semibold

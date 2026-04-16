@@ -1,15 +1,36 @@
 /**
  * Falling confetti particles — fixed to viewport, rains down from top.
+ * Honors prefers-reduced-motion: disabled entirely for users who opt out
+ * of motion (also helps low-end projector PCs that can't keep up).
  */
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const EMOJIS = ['⭐', '🌟', '✨', '🎉', '🎊', '💫', '🏆', '👑', '🎈', '🥳'];
 
 export default function Particles({ count = 35 }) {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const handler = (e) => setReduced(e.matches);
+    mq.addEventListener?.('change', handler);
+    return () => mq.removeEventListener?.('change', handler);
+  }, []);
+
+  // Cap particle count for slower devices, half it on small viewports.
+  const effectiveCount = useMemo(() => {
+    if (reduced) return 0;
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return Math.min(count, 14);
+    }
+    return count;
+  }, [count, reduced]);
+
   const particles = useMemo(
     () =>
-      Array.from({ length: count }, (_, i) => ({
+      Array.from({ length: effectiveCount }, (_, i) => ({
         id: i,
         left:     `${Math.random() * 100}%`,
         delay:    Math.random() * 4,
@@ -18,8 +39,10 @@ export default function Particles({ count = 35 }) {
         size:     18 + Math.random() * 18,
         rotate:   Math.random() > 0.5 ? 360 : -360,
       })),
-    [count]
+    [effectiveCount]
   );
+
+  if (effectiveCount === 0) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">

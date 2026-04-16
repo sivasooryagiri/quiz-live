@@ -2,40 +2,101 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Game state — anyone can read (players, host all need this).
-    // Writes open so host screen can auto-advance timer from the projector.
-    match /meta/{doc} {
-      allow read: if true;
-      allow write: if true;
+    // ─── Helpers ──────────────────────────────────────────────
+    function game() {
+      return get(/databases/$(database)/documents/meta/gameState).data;
+    }
+    function question(qId) {
+      return get(/databases/$(database)/documents/questions/$(qId)).data;
+    }
+    // Seconds elapsed since the current question started, per server clock.
+    function serverElapsed() {
+      return duration.value(request.time - game().questionStartTime, 's');
+    }
+    // Mirrors calcScore() in src/firebase/db.js exactly:
+    //   max(5, round(30 - (min(elapsed, timer) / timer) * 25))
+    function maxScoreFor(elapsed, timer) {
+      return math.max(5, math.round(30 - (math.min(elapsed, timer) / timer) * 25));
     }
 
-    // Questions — public read, admin-only write.
-    // Prevents players from deleting or editing questions.
+    // Validates an answer write against authoritative server state:
+    //   - phase must be 'question'
+    //   - timeTaken must be within 2s of server-measured elapsed (blocks "always 0s" cheats)
+    //   - isCorrect must match the actual correctAnswer of the question
+    //   - score must be 0 for wrong; 5..maxScoreFor(timeTaken, timer) for correct
+    function answerIsValid(d) {
+      return d.questionId is string
+          && d.answer is int
+          && d.timeTaken is number
+          && d.timeTaken >= 0
+          && d.score is int
+          && d.score >= 0
+          && d.score <= 30
+          && d.isCorrect is bool
+          && game().phase == 'question'
+          && d.timeTaken >= serverElapsed() - 2
+          && d.isCorrect == (d.answer == question(d.questionId).correctAnswer)
+          && (
+               (d.isCorrect == false && d.score == 0)
+               ||
+               (d.isCorrect == true
+                 && d.score >= 5
+                 && d.score <= maxScoreFor(d.timeTaken, question(d.questionId).timer))
+             );
+    }
+
+    // ─── meta/gameState ───────────────────────────────────────
+    // Public read. Anyone can create on first init (one-time bootstrap).
+    // Only authenticated admin can update phase, indices, settings, etc.
+    match /meta/{doc} {
+      allow read:   if true;
+      allow create: if true;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // ─── questions ────────────────────────────────────────────
+    // Public read; admin-only write.
     match /questions/{id} {
-      allow read: if true;
+      allow read:  if true;
       allow write: if request.auth != null;
     }
 
-    // Players — anyone can join (create) and scores update during game.
-    // Only authenticated admin can delete (used during reset).
+    // ─── players ──────────────────────────────────────────────
+    // Anyone can join (create) with a 2-20 char name and score=0.
+    // Updates restricted to ONLY the `score` field, integer 0-5000.
+    // (Caveat: a malicious client can still inflate their own score within
+    // the cap without going through submitAnswer. Eliminating this fully
+    // requires Cloud Functions; documented in SECURITY.md.)
     match /players/{playerId} {
       allow read:   if true;
-      allow create: if true;
-      allow update: if true;
+      allow create: if request.resource.data.name is string
+                    && request.resource.data.name.size() >= 2
+                    && request.resource.data.name.size() <= 20
+                    && request.resource.data.score == 0;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score'])
+                    && request.resource.data.score is int
+                    && request.resource.data.score >= 0
+                    && request.resource.data.score <= 5000;
       allow delete: if request.auth != null;
     }
 
-    // Answers — anyone can submit their own answer.
-    // Only authenticated admin can delete (used during reset).
+    // ─── answers ──────────────────────────────────────────────
+    // Server-validated (see answerIsValid). Cheating attempts:
+    //   - score=99999          → rejected (cap 30 + maxScoreFor)
+    //   - timeTaken=0 always   → rejected (must be >= serverElapsed - 2)
+    //   - isCorrect=true lie   → rejected (must match actual correct answer)
+    //   - submit after timer   → rejected (phase != 'question')
+    //   - submit before quiz   → rejected (phase != 'question')
     match /answers/{answerId} {
       allow read:   if true;
-      allow create: if true;
-      allow update: if true;
+      allow create: if answerIsValid(request.resource.data);
+      allow update: if answerIsValid(request.resource.data);
       allow delete: if request.auth != null;
     }
 
-    // Sessions — written by admin after quiz ends, read by admin history panel.
-    // Fully protected — players cannot tamper with past results.
+    // ─── sessions ─────────────────────────────────────────────
+    // Public read for history; admin-only write (saved when quiz ends).
     match /sessions/{sessionId} {
       allow read:  if true;
       allow write: if request.auth != null;

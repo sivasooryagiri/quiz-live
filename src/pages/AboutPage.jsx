@@ -56,7 +56,7 @@ export default function AboutPage() {
           <p className="text-white/60 text-sm leading-relaxed">
             Cleaner UI that works for any audience. No account creation for players — just scan and join.
             Self-hostable on a private IP so you can run it completely offline. Timer-based scoring that
-            rewards speed. Free tier Firebase handles up to 50 players at zero cost.
+            rewards speed. Free tier Firebase handles up to 100 simultaneous players at zero cost.
           </p>
         </div>
 

@@ -1,14 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import useGameState from '../hooks/useGameState';
-import { subscribeToQuestions, advanceToResults, advanceToLeaderboard } from '../firebase/db';
+import { subscribeToQuestions } from '../firebase/db';
 import WaitingScreen    from '../components/host/WaitingScreen';
 import QuestionPhase    from '../components/host/QuestionPhase';
 import ResultsPhase     from '../components/host/ResultsPhase';
 import LeaderboardPhase from '../components/host/LeaderboardPhase';
 import EndedPhase       from '../components/host/EndedPhase';
 import LoadingSpinner   from '../components/shared/LoadingSpinner';
+import ErrorScreen      from '../components/shared/ErrorScreen';
 
 const fade = {
   initial:    { opacity: 0 },
@@ -17,46 +18,18 @@ const fade = {
   transition: { duration: 0.5 },
 };
 
+// HostPage is read-only — pure projector display.
+// Auto-advance lives in AdminPage so meta writes stay admin-authenticated.
 export default function HostPage() {
-  const { gameState, loading } = useGameState();
+  const { gameState, loading, error } = useGameState();
   const [questions, setQuestions] = useState([]);
-  const timerRef = useRef(null);
 
   useEffect(() => {
     const unsub = subscribeToQuestions(setQuestions);
     return unsub;
   }, []);
 
-  // Auto-advance question → results when timer expires.
-  // Transaction ensures only one client advances even if multiple host tabs are open.
-  useEffect(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (!gameState || gameState.phase !== 'question') return;
-    if (!gameState.questionStartTime)                  return;
-
-    const currentQ = questions[gameState.currentQuestionIndex];
-    if (!currentQ) return;
-
-    const startMs =
-      gameState.questionStartTime?.toMillis?.() ??
-      (gameState.questionStartTime?.seconds ?? 0) * 1000;
-
-    const elapsed   = (Date.now() - startMs) / 1000;
-    const remaining = Math.max(0, (currentQ.timer ?? 15) - elapsed);
-
-    timerRef.current = setTimeout(() => {
-      advanceToResults().catch(console.error);
-    }, remaining * 1000);
-
-    return () => clearTimeout(timerRef.current);
-  }, [
-    gameState?.phase,
-    gameState?.currentQuestionIndex,
-    // Use the seconds value as a primitive dep to avoid infinite re-renders
-    gameState?.questionStartTime?.seconds,
-    questions,
-  ]);
-
+  if (error) return <ErrorScreen message={error} />;
   if (loading) return <LoadingSpinner />;
 
   const phase    = gameState?.phase ?? 'waiting';
