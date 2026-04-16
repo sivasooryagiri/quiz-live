@@ -70,17 +70,6 @@ export default function WaitingScreen({ gameState }) {
           />
         </motion.div>
 
-        {/* URL */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-center"
-        >
-          <p className="text-white/40 text-sm uppercase tracking-widest mb-1">Scan QR or visit</p>
-          <p className="text-brand-300 text-2xl font-bold">{joinUrl.replace(/^https?:\/\//, '')}</p>
-        </motion.div>
-
         {/* Animated dots */}
         <div className="flex gap-3">
           {[0, 1, 2, 3].map((i) => (

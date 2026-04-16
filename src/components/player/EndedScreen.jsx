@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { subscribeToPlayers } from '../../firebase/db';
+import { subscribeToPlayers, getPlayerRank } from '../../firebase/db';
 import Particles from '../shared/Particles';
 
 export default function EndedScreen({ playerId, playerName }) {
@@ -11,8 +11,8 @@ export default function EndedScreen({ playerId, playerName }) {
     return unsub;
   }, []);
 
-  const myRank  = players.findIndex((p) => p.id === playerId) + 1;
-  const myScore = players.find((p) => p.id === playerId)?.score ?? 0;
+  const myRank   = players.length ? getPlayerRank(players, playerId) : 0;
+  const myScore  = players.find((p) => p.id === playerId)?.score ?? 0;
   const isWinner = myRank === 1 && players.length > 0;
 
   return (
