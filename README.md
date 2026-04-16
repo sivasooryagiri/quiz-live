@@ -55,14 +55,14 @@ _Coming soon._
 
 Pick the setup that fits your situation:
 
-| Method | Best for | Cost |
-|--------|----------|------|
-| [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, events on same Wi-Fi | $0 — truly free |
-| [☁️ AWS EC2](docs/deploy-aws.md) | Public quiz, full control, your own server | ~$0 free tier |
-| [🔥 Firebase + Vercel](docs/deploy-free.md) | Easiest cloud setup, up to 100 players free | $0 up to 100 players |
-| [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | $0 |
+| Method | Best for | Where it runs |
+|--------|----------|---------------|
+| [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, events on same Wi-Fi | Your laptop |
+| [☁️ AWS EC2](docs/deploy-aws.md) | Public quiz, full control, your own server | AWS instance |
+| [🔥 Firebase + Vercel](docs/deploy-free.md) | Easiest cloud setup, no server to manage | Vercel CDN |
+| [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | Any container host |
 
-> **On Firebase costs:** Firebase is the database. Free tier covers up to ~100 simultaneous players. Beyond that, Blaze pay-as-you-go kicks in — roughly $5–7/month for 500 players at 3 sessions/day. You control your own Firebase project and billing. For local or AWS setups, costs depend only on your own server.
+> **All four use Firebase Firestore as the real-time database** — that part is the same everywhere. Firebase's free tier comfortably covers normal use (~80–100 concurrent players). For larger events or detailed pricing → [FIREBASE-COSTS.md](FIREBASE-COSTS.md).
 
 ---
 
