@@ -1,4 +1,8 @@
-# <img src="public/logo.svg" width="36" height="36" alt="QuizLive" style="vertical-align:middle"> QuizLive — Free Kahoot & Slido Alternative
+<p align="center">
+  <img src="public/logo.svg" width="80" alt="QuizLive logo" />
+</p>
+
+# QuizLive — Free Kahoot & Slido Alternative
 
 **Free. Open source. Fully yours.**
 
