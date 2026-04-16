@@ -1,14 +1,29 @@
-# 🎯 QuizLive
+# 🎯 QuizLive — Free Kahoot & Slido Alternative
 
 **Free. Open source. Fully yours.**
 
-A real-time multiplayer quiz app — like Kahoot or Slido, but without the paywall, the account wall, or the vendor deciding what you can do with it. Run it on a laptop, share it over Wi-Fi, or deploy it to the cloud. Your call.
+QuizLive is a **free, open-source real-time multiplayer quiz app** — a self-hosted alternative to Kahoot, Slido, Mentimeter, and Poll Everywhere. No paywall. No account required to play. No vendor deciding what you can do with it. Run it on a laptop, share it over Wi-Fi, or deploy it to the cloud. Your call.
+
+> Looking for a **free Kahoot alternative**? A **free Slido alternative**? A **self-hosted quiz platform** for classrooms, events, or team meetups? This is it.
 
 ![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Firestore-ff6f00?style=flat-square&logo=firebase&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646cff?style=flat-square&logo=vite&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-Non--Commercial-red?style=flat-square)
+
+---
+
+## 🆚 Why QuizLive over Kahoot / Slido?
+
+| | QuizLive | Kahoot | Slido |
+|--|---------|--------|-------|
+| Free to use | ✅ Always | ⚠️ Limited free tier | ⚠️ Limited free tier |
+| Self-hostable | ✅ Yes | ❌ No | ❌ No |
+| No player accounts | ✅ Yes | ✅ Yes | ✅ Yes |
+| No vendor lock-in | ✅ Open source | ❌ Proprietary | ❌ Proprietary |
+| Works on local network | ✅ Offline-capable | ❌ Requires internet | ❌ Requires internet |
+| Unlimited questions | ✅ Yes | ⚠️ Paid plan | ⚠️ Paid plan |
 
 ---
 
@@ -135,6 +150,16 @@ Players type any word during a session. Words appear as floating bubbles on the 
 - [ ] ⏱️ Timed lobby — auto-start after countdown
 - [ ] 📥 Question import — paste a JSON or CSV to bulk-add questions
 - [ ] 🔔 Webhook on session end — post results to Slack, Discord, or a URL
+
+---
+
+## 🔍 Use cases
+
+- 🏫 **Teachers** — run classroom quizzes without a Kahoot subscription
+- 🏢 **Teams** — replace Slido for internal events and town halls
+- 🎉 **Events** — trivia nights, conferences, community meetups
+- 🖥️ **Self-hosters** — full control, runs on your own hardware
+- 🌐 **Offline use** — works on a local network with no internet
 
 ---
 
