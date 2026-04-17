@@ -39,7 +39,7 @@ QuizLive is a free, open-source, real-time multiplayer quiz and trivia platform 
 - 📱 Players join from their phones — scan a QR or visit a URL, no account needed
 - 🖥️ Host screen runs on the projector — live answer chart, timer, leaderboard podium
 - 🎛️ Admin panel controls everything — questions, game flow, QR toggle, session history
-- ⚡ Scores are time-weighted — faster correct answers earn more
+- ⚡ Scores are time-weighted — faster correct answers earn more ([how scoring & ranking work →](SCORING.md))
 - 📋 Full session history saved automatically — download any past leaderboard as CSV
 - 🌐 Works offline on a local network — no internet required
 

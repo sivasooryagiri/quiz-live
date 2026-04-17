@@ -7,6 +7,8 @@ import { subscribeToPlayers } from '../../firebase/db';
 const getRank = (players, score) =>
   players.filter((p) => p.score > score).length + 1;
 
+const MEDAL_BY_RANK = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
 const PODIUM_ORDER = [1, 0, 2]; // visual order: 2nd, 1st, 3rd
 
 const PODIUM_STYLES = [
@@ -15,7 +17,6 @@ const PODIUM_STYLES = [
     gradient:  'from-slate-300 to-slate-400',
     shadow:    'shadow-slate-300/30',
     ring:      'ring-slate-300/40',
-    medal:     '🥈',
     textSize:  'text-base',
     textColor: 'text-gray-800',
     subColor:  'text-gray-600',
@@ -25,7 +26,6 @@ const PODIUM_STYLES = [
     gradient:  'from-yellow-300 via-amber-400 to-yellow-500',
     shadow:    'shadow-yellow-400/60',
     ring:      'ring-yellow-300/60',
-    medal:     '🥇',
     textSize:  'text-lg',
     isWinner:  true,
     textColor: 'text-gray-900',
@@ -36,14 +36,13 @@ const PODIUM_STYLES = [
     gradient:  'from-amber-600 to-orange-600',
     shadow:    'shadow-orange-500/30',
     ring:      'ring-orange-400/40',
-    medal:     '🥉',
     textSize:  'text-sm',
     textColor: 'text-white',
     subColor:  'text-white/80',
   },
 ];
 
-function PodiumSlot({ player, style, delay }) {
+function PodiumSlot({ player, rank, style, delay }) {
   if (!player) return <div className="w-40" />;
 
   return (
@@ -84,7 +83,7 @@ function PodiumSlot({ player, style, delay }) {
                     flex items-center justify-center text-xl font-black text-white
                     ring-2 ${style.ring} shadow-xl ${style.shadow}`}
       >
-        {player.name.charAt(0).toUpperCase()}
+        #{rank}
       </motion.div>
 
       {/* Podium block */}
@@ -93,7 +92,7 @@ function PodiumSlot({ player, style, delay }) {
                     rounded-t-2xl flex flex-col items-center justify-end pb-4
                     shadow-xl ${style.shadow}`}
       >
-        <span className="text-2xl mb-1">{style.medal}</span>
+        <span className="text-2xl mb-1">{MEDAL_BY_RANK[rank] ?? ''}</span>
         <p className={`${style.textColor} font-black ${style.textSize} text-center px-2 w-full truncate`}>
           {player.name}
         </p>
@@ -161,12 +160,13 @@ export default function LeaderboardPhase({ gameState, questions }) {
         </motion.div>
 
         {/* Podium — top 3 */}
-        {top50.length > 0 && (
+        {ranked.length > 0 && (
           <div className="flex justify-center items-end gap-4 relative">
             {PODIUM_ORDER.map((rankIdx, vi) => (
               <PodiumSlot
                 key={rankIdx}
-                player={top50[rankIdx]}
+                player={ranked[rankIdx]}
+                rank={ranked[rankIdx]?.displayRank}
                 style={PODIUM_STYLES[vi]}
                 delay={0.1 + vi * 0.15}
               />
@@ -175,10 +175,10 @@ export default function LeaderboardPhase({ gameState, questions }) {
         )}
 
         {/* Ranks 4+ */}
-        {top50.length > 3 && (
+        {ranked.length > 3 && (
           <div className="flex flex-col gap-2 max-w-2xl mx-auto w-full">
             <AnimatePresence>
-              {top50.slice(3).map((p, i) => (
+              {ranked.slice(3).map((p, i) => (
                 <motion.div
                   key={p.id}
                   layout
@@ -188,11 +188,11 @@ export default function LeaderboardPhase({ gameState, questions }) {
                   className="flex items-center gap-3 rounded-xl px-4 py-3
                              bg-white/5 border border-white/10 hover:bg-white/8"
                 >
-                  {/* Sequential rank */}
+                  {/* Tie-aware rank (matches player screen) */}
                   <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center
                                   justify-center shrink-0 border border-white/10">
                     <span className="text-white/60 font-black text-sm">
-                      {i + 4}
+                      {p.displayRank}
                     </span>
                   </div>
 
