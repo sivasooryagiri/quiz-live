@@ -14,18 +14,32 @@ import { subscribeToQuestionAnswers, subscribeToAnswerKey } from '../../firebase
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
-function CustomLabel({ x, y, width, height, value, isCorrect }) {
-  if (!value) return null;
+// Pill-shaped count chip at the end of each bar.
+function CountChip({ x, y, width, height, value }) {
+  const cx = x + width + 28;
+  const cy = y + height / 2;
+  const r  = 18;
   return (
-    <text
-      x={x + width + 8}
-      y={y + height / 2 + 5}
-      fill={isCorrect ? '#4ade80' : '#f87171'}
-      fontSize={18}
-      fontWeight={700}
-    >
-      {value}
-    </text>
+    <g>
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="rgba(15,10,30,0.85)"
+        stroke="rgba(255,255,255,0.15)"
+        strokeWidth={1}
+      />
+      <text
+        x={cx}
+        y={cy + 5}
+        textAnchor="middle"
+        fill="white"
+        fontSize={15}
+        fontWeight={800}
+      >
+        {value ?? 0}
+      </text>
+    </g>
   );
 }
 
@@ -70,13 +84,20 @@ export default function ResultsPhase({ question, questionIndex, totalQuestions }
         </div>
       </div>
 
-      {/* Question recap */}
+      {/* Question recap + inline correct answer */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-strong rounded-2xl px-6 py-4 mb-6"
+        className="glass-strong rounded-2xl px-6 py-4 mb-4 flex flex-col items-center gap-2"
       >
         <p className="text-white text-2xl font-bold text-center">{question.text}</p>
+        {correctIdx != null && (
+          <span className="inline-flex items-center gap-2 rounded-full px-4 py-1
+                           bg-green-500/15 border border-green-400/30
+                           text-green-300 text-sm font-bold">
+            ✅ {OPTION_LABELS[correctIdx]}. {question.options[correctIdx]}
+          </span>
+        )}
       </motion.div>
 
       {/* Bar chart */}
@@ -121,30 +142,12 @@ export default function ResultsPhase({ question, questionIndex, totalQuestions }
                   style={entry.correct ? { filter: 'drop-shadow(0 0 10px #22c55e)' } : {}}
                 />
               ))}
-              <LabelList
-                dataKey="count"
-                position="right"
-                formatter={(val) => `${val} ${val === 1 ? 'person' : 'people'}`}
-                style={{ fill: 'white', fontSize: 16, fontWeight: 700 }}
-              />
+              <LabelList dataKey="count" content={<CountChip />} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </motion.div>
 
-      {/* Correct answer callout */}
-      {correctIdx != null && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="mt-4 text-center"
-        >
-          <span className="glass rounded-xl px-6 py-3 text-green-300 font-bold text-lg inline-block">
-            ✅ Correct answer: {OPTION_LABELS[correctIdx]}. {question.options[correctIdx]}
-          </span>
-        </motion.div>
-      )}
     </div>
   );
 }
