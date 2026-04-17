@@ -17,7 +17,7 @@ export default function JoinScreen({ onJoin, joining, error, suggested, onClearS
   const isTaken = error === 'name_taken';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6
+    <div className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center px-6
                     bg-gradient-to-br from-[#0f0a1e] via-[#1a0a2e] to-[#0a1628]">
       {/* Background orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -32,16 +32,16 @@ export default function JoinScreen({ onJoin, joining, error, suggested, onClearS
         className="relative z-10 w-full max-w-sm"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-5">
           <motion.div
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            className="mb-4"
+            className="mb-3"
           >
-            <img src="/logo.svg" alt="QuizLive" className="w-16 h-16 mx-auto" />
+            <img src="/logo.svg" alt="QuizLive" className="w-14 h-14 mx-auto" />
           </motion.div>
-          <h1 className="text-3xl font-black gradient-text">{gameTitle}</h1>
-          <p className="text-brand-300 mt-2 text-sm">Enter your name to join</p>
+          <h1 className="text-2xl font-black gradient-text">{gameTitle}</h1>
+          <p className="text-brand-300 mt-1 text-sm">Enter your name to join</p>
         </div>
 
         <form onSubmit={submit} className="glass rounded-2xl p-6 space-y-4">
