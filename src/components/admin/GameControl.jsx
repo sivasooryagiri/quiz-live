@@ -59,6 +59,24 @@ export default function GameControl({ gameState, questions }) {
 
   const isLastQuestion = qIndex >= total - 1;
 
+  // Inline two-step confirm for Reset — window.confirm() is silently
+  // suppressed by some browsers, which made the button look dead.
+  const [confirmReset, setConfirmReset] = useState(false);
+  const handleReset = async () => {
+    if (!confirmReset) {
+      setConfirmReset(true);
+      setTimeout(() => setConfirmReset(false), 4000);
+      return;
+    }
+    setConfirmReset(false);
+    try {
+      await resetGame();
+    } catch (err) {
+      console.error('Reset game failed:', err);
+      alert(`Couldn't reset game: ${err.code || err.message || err}`);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Status card */}
@@ -135,11 +153,10 @@ export default function GameControl({ gameState, questions }) {
       <div className="glass rounded-2xl p-4">
         <p className="text-xs text-white/40 uppercase tracking-wider font-semibold mb-3">Danger Zone</p>
         <ActionButton
-          label="🔄 Reset Game (clears all players & answers)"
-          onClick={() => {
-            if (!confirm('Reset the game? This will delete ALL players and answers.')) return;
-            return resetGame();
-          }}
+          label={confirmReset
+            ? '⚠ Confirm reset — click again to wipe players & answers'
+            : '🔄 Reset Game (clears all players & answers)'}
+          onClick={handleReset}
           danger
         />
       </div>
