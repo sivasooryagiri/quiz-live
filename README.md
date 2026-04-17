@@ -53,6 +53,11 @@ QuizLive is a free, open-source, real-time multiplayer quiz and trivia platform 
 </p>
 
 <p align="center">
+  <img src="docs/screenshots/question.png" width="820" alt="Player question screen — four color-coded answer options with countdown timer" />
+  <br /><sub><em>Player question screen — tap to answer, faster = more points</em></sub>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/gameplay.png" width="820" alt="Players on phones seeing result, admin controls, and host screen showing live answer bar chart" />
   <br /><sub><em>Live gameplay — player phones, admin controls, host answer chart</em></sub>
 </p>
