@@ -16,10 +16,13 @@ service cloud.firestore {
     function serverElapsed() {
       return duration.value(request.time - game().questionStartTime, 's');
     }
-    // Mirrors calcScore() in src/firebase/db.js exactly:
-    //   max(5, round(30 - (min(elapsed, timer) / timer) * 25))
+    // Mirrors calcScore() in src/firebase/db.js. Firestore rules expose
+    // math.round/abs/floor/ceil/pow/sqrt but NOT math.max or math.min —
+    // using them makes every rule evaluation error out and deny. Cap via
+    // ternary; drop the lower max(5,…) because elapsed is clamped to timer
+    // so the expression bottoms out at 30 - 25 = 5 naturally.
     function maxScoreFor(elapsed, timer) {
-      return math.max(5, math.round(30 - (math.min(elapsed, timer) / timer) * 25));
+      return math.round(30 - (elapsed < timer ? elapsed : timer) / timer * 25);
     }
 
     // Validates an answer write against authoritative server state:
