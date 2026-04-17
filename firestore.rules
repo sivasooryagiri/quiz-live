@@ -33,8 +33,15 @@ service cloud.firestore {
     // submit is now accepted regardless of phone clock drift or cell
     // latency, matching Kahoot/Slido's behavior. Multi-write inflation is
     // still blocked by the 30-pt delta cap on /players updates.
-    function answerIsValid(d) {
+    function answerIsValid(answerId, d) {
       return d.questionId is string
+          && d.playerId is string
+          // Doc ID must be {questionId}_{playerId}. Stops an attacker from
+          // writing arbitrary answer IDs, or writing an answer whose
+          // `playerId` field disagrees with the doc's own player — the
+          // player-score update in the same tx always targets `d.playerId`,
+          // so pinning the ID here pins who can be affected.
+          && answerId == d.questionId + '_' + d.playerId
           && d.answer is int
           && d.answer >= 0 && d.answer <= 3
           && d.timeTaken is number
@@ -114,16 +121,16 @@ service cloud.firestore {
 
     // ─── answers ──────────────────────────────────────────────
     // Server-validated (see answerIsValid). Cheating attempts:
-    //   - score=99999          → rejected (cap 30 + maxScoreFor)
-    //   - timeTaken=0 always   → rejected (must be >= serverElapsed - 2)
+    //   - score=99999          → rejected (cap 30 + maxScoreFor cap)
     //   - isCorrect=true lie   → rejected (must match actual correctAnswer)
     //   - submit after timer   → rejected (phase != 'question')
     //   - submit before quiz   → rejected (phase != 'question')
     //   - answer index 99      → rejected (must be 0..3)
+    //   - write under forged ID → rejected (doc ID must be qId_pId)
     match /answers/{answerId} {
       allow read:   if true;
-      allow create: if answerIsValid(request.resource.data);
-      allow update: if answerIsValid(request.resource.data);
+      allow create: if answerIsValid(answerId, request.resource.data);
+      allow update: if answerIsValid(answerId, request.resource.data);
       allow delete: if request.auth != null;
     }
 
