@@ -268,17 +268,15 @@ export const joinGame = async (rawName) => {
 };
 
 // Aggregates scores live from /answers + /answerKeys.
-// Firestore listeners are permanently killed after permission-denied — they do
-// NOT auto-recover when rules change. answerKeys are locked during question
-// phase, so the first subscription always dies. We retry every 3s until the
-// phase changes to results/leaderboard and the read is allowed.
+// Scores are computed by joining answers with answerKeys.
+// answerKeys collection-level queries fail for unauthenticated users (the
+// per-doc rule can't be satisfied across all docs in a list query). Instead
+// we do individual getDoc calls per questionId — these work fine during
+// results/leaderboard phase per the per-document rule.
 export const subscribeToPlayers = (cb) => {
   let players = [];
   let answers = [];
   let keyMap  = {};
-  let unsubKeys   = null;
-  let retryTimer  = null;
-  let destroyed   = false;
 
   const merge = () => {
     const scoreMap = {};
@@ -294,20 +292,21 @@ export const subscribeToPlayers = (cb) => {
     );
   };
 
-  const startKeyListener = () => {
-    unsubKeys = onSnapshot(
-      answerKeysCol(),
-      (snap) => {
-        keyMap = {};
-        snap.docs.forEach((d) => { keyMap[d.id] = d.data().correctAnswer; });
-        merge();
-      },
-      () => {
-        // permission denied (question phase) — retry after 3s
-        unsubKeys = null;
-        if (!destroyed) retryTimer = setTimeout(startKeyListener, 3000);
-      }
+  // Fetch any answerKeys not yet in keyMap. Individual getDoc calls work
+  // during results/leaderboard/ended phase; silently no-op during question phase.
+  const refreshKeys = async () => {
+    const missing = [...new Set(answers.map((a) => a.questionId))]
+      .filter((id) => !(id in keyMap));
+    if (!missing.length) { merge(); return; }
+    await Promise.all(
+      missing.map(async (qId) => {
+        try {
+          const snap = await getDoc(doc(db, 'answerKeys', qId));
+          if (snap.exists()) keyMap[qId] = snap.data().correctAnswer;
+        } catch (_) {}
+      })
     );
+    merge();
   };
 
   const unsubPlayers = onSnapshot(playersCol(), (snap) => {
@@ -316,18 +315,10 @@ export const subscribeToPlayers = (cb) => {
   });
   const unsubAnswers = onSnapshot(answersCol(), (snap) => {
     answers = snap.docs.map((d) => d.data());
-    merge();
+    refreshKeys();
   });
 
-  startKeyListener();
-
-  return () => {
-    destroyed = true;
-    clearTimeout(retryTimer);
-    unsubPlayers();
-    unsubAnswers();
-    if (unsubKeys) unsubKeys();
-  };
+  return () => { unsubPlayers(); unsubAnswers(); };
 };
 
 export const subscribeToPlayerCount = (cb) =>
