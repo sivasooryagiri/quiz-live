@@ -39,7 +39,7 @@ QuizLive is a free, open-source, real-time multiplayer quiz and trivia platform 
 - 📱 Players join from their phones — scan a QR or visit a URL, no account needed
 - 🖥️ Host screen runs on the projector — live answer chart, timer, leaderboard podium
 - 🎛️ Admin panel controls everything — questions, game flow, QR toggle, session history
-- ⚡ Scores are time-weighted — faster correct answers earn more ([how scoring & ranking work →](SCORING.md))
+- ⚡ Scores are time-weighted — faster correct answers earn more, computed from answers so they can't be tampered with ([how scoring & ranking work →](SCORING.md))
 - 📋 Full session history saved automatically — download any past leaderboard as CSV
 - 🌐 Works offline on a local network — no internet required
 
@@ -84,6 +84,8 @@ Pick the setup that fits your situation:
 | [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, events on same Wi-Fi | Your laptop |
 | [☁️ AWS EC2](docs/deploy-aws.md) | Public quiz, full control, your own server | AWS instance |
 | [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | Any container host |
+
+> 📖 **Docs:** [Scoring & Ranking](SCORING.md) · [Security & Threat Model](SECURITY.md) · [Firebase Costs](FIREBASE-COSTS.md)
 
 > ⭐ **Recommended:** **Firebase + Vercel CDN** — zero servers to babysit, global CDN, free up to ~80–100 concurrent players. **This is the only setup we've tested end-to-end.** The Local / AWS / Docker paths should work (same code, just different host) but we haven't run them ourselves — your mileage may vary.
 
