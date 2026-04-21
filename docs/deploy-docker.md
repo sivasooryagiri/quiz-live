@@ -1,70 +1,44 @@
-# 🐳 Self-Host with Docker
+# Self-Host with Docker
 
-Run QuizLive in a clean, isolated container — works on any machine with Docker installed.  
-Good for self-hosting on a VPS, a home server, or keeping things tidy on your own machine.
+Run QuizLive in a container — works on any machine or VPS with Docker installed.
 
----
-
-## Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) installed
-- A Firebase project (free Spark plan is fine) — [set one up here](https://console.firebase.google.com)
+**You need:** Docker, a Firebase project (free).
 
 ---
 
-## Step 1 — Clone the repo
+## Step 1 — Firebase setup
+
+### Create a project & get config keys
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) → **Add project**
+2. Give it a name → disable Google Analytics → **Create project**
+3. Left sidebar → **Firestore Database → Create database** → **Start in production mode** → pick a region → **Done**
+4. Click the **gear icon** → **Project settings** → scroll to **Your apps** → click **`</>`** (Web)
+5. Give the app any nickname → **Register app** → copy the `firebaseConfig` values shown
+
+### Create the admin user
+
+1. Left sidebar → **Authentication → Get started** → **Email/Password → Enable → Save**
+2. **Users → Add user** → Email: **`admin@quizlive.internal`** → set a password → **Add user**
+
+> The email must be exactly `admin@quizlive.internal`. Password is never stored in code or env vars.
+
+### Deploy Firestore security rules (REQUIRED)
+
+1. Open [`firestore.rules`](../firestore.rules) → copy all contents
+2. Firebase Console → **Firestore Database → Rules** tab → delete everything → paste → **Publish**
+
+---
+
+## Step 2 — Clone & configure
 
 ```bash
 git clone https://github.com/sivasooryagiri/quizlive.git
 cd quizlive
-```
-
----
-
-## Step 2 — Enable Firebase Authentication
-
-1. In Firebase console → **Authentication → Get started**
-2. Click **Email/Password** → Enable → Save
-3. Go to **Users → Add user**
-4. Email — you **must** use exactly: **`admin@quizlive.internal`**
-5. Password — pick any strong password
-6. Click **Add user**
-
-> ⚠️ The email is hardcoded in `src/components/admin/LoginScreen.jsx`. Login screen only asks for the password and signs in as `admin@quizlive.internal`. **Different email = login fails.** Change line 16 of that file before building if you want a different email.
->
-> Password is **not** an env var — it lives only in Firebase Auth.
-
----
-
-## Step 2b — Create the Firestore database
-
-1. Firebase Console → left sidebar → **Firestore Database → Create database**
-2. Select **Start in production mode** → Next (rules get replaced in Step 2c; test mode = public r/w, skip it)
-3. Pick a region close to your users → Done
-
----
-
-## Step 2c — Deploy Firestore security rules (REQUIRED)
-
-The `firestore.rules` file in this repo blocks players from reading the answers, forging scores, or writing arbitrary data. **Without it your DB is wide open** (test mode) — and production mode without rules denies everything, so the app won't work either. Publish the rules now.
-
-**Easy way — paste into Firebase Console:**
-
-1. Open `firestore.rules` in this repo → **Copy all** of its contents
-2. Firebase Console → **Firestore Database** → **Rules** tab
-3. Replace everything → **Publish**
-
-**CLI way:** `npm install -g firebase-tools && firebase login && firebase deploy --only firestore:rules`
-
----
-
-## Step 3 — Configure environment
-
-```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in your Firebase values:
+Open `.env` and fill in your values:
 
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
@@ -73,64 +47,38 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000000000000:web:xxxx
-
 VITE_JOIN_URL=http://localhost:3000
 ```
 
-> If running on a server, set `VITE_JOIN_URL` to your server's public IP or domain, e.g. `http://192.168.1.42:3000` or `https://quiz.yourdomain.com`.
+> Running on a server? Set `VITE_JOIN_URL` to your server's public IP or domain, e.g. `https://quiz.yourdomain.com`.
 
 ---
 
-## Step 4 — Build the image
+## Step 3 — Build & run
 
 ```bash
 docker build -t quizlive .
-```
-
-This compiles the app into a production build inside the container.
-
----
-
-## Step 5 — Run the container
-
-```bash
-docker run -p 3000:3000 --env-file .env quizlive
-```
-
-App is live at `http://localhost:3000`
-
-- **Player join:** `http://localhost:3000`
-- **Admin panel:** `http://localhost:3000/admin`
-- **Host screen:** `http://localhost:3000/host`
-
----
-
-## Keep it running in the background
-
-```bash
 docker run -d --restart unless-stopped -p 3000:3000 --env-file .env --name quizlive quizlive
 ```
 
-- `-d` — runs detached (background)
-- `--restart unless-stopped` — auto-restarts on reboot or crash
-
-Check logs:
-
-```bash
-docker logs -f quizlive
-```
-
-Stop it:
-
-```bash
-docker stop quizlive
-```
+| URL | Purpose |
+|-----|---------|
+| `http://localhost:3000` | Player join |
+| `http://localhost:3000/admin` | Admin panel |
+| `http://localhost:3000/host` | Host / projector |
 
 ---
 
-## Updating to a new version
+## Useful commands
 
 ```bash
+# View logs
+docker logs -f quizlive
+
+# Stop
+docker stop quizlive
+
+# Update to latest version
 git pull
 docker build -t quizlive .
 docker stop quizlive && docker rm quizlive
@@ -141,5 +89,5 @@ docker run -d --restart unless-stopped -p 3000:3000 --env-file .env --name quizl
 
 ## Notes
 
-- The container bakes your `.env` values into the build at compile time (Vite inlines `VITE_*` vars). If you change `.env`, rebuild the image.
-- Firebase credentials in `VITE_*` variables are visible in the browser bundle — this is expected for Firebase web apps. Secure your Firestore rules to limit what unauthenticated clients can do.
+- Vite bakes `VITE_*` env vars into the build at compile time. If you change `.env`, rebuild the image.
+- Firebase credentials are visible in the browser bundle — this is expected for all Firebase web apps. Your Firestore rules are what protect the data.

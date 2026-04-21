@@ -1,76 +1,43 @@
-# Run Locally & Share on Private Network
+# Run Locally — Laptop / Private Network
 
-Run QuizLive on your own machine and let anyone on the same Wi-Fi join — no internet required.
+Run QuizLive on your own machine. Players on the same Wi-Fi can join from their phones — no internet required.
 
----
-
-## Prerequisites
-
-- [Node.js 18+](https://nodejs.org) installed
-- A Firebase project (free Spark plan is fine)
-- Git
+**You need:** Node.js 18+, a Firebase project (free), basic comfort with a terminal.
 
 ---
 
-## Step 1 — Clone & install
+## Step 1 — Firebase setup
+
+### Create a project & get config keys
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) → **Add project**
+2. Give it a name → disable Google Analytics → **Create project**
+3. Left sidebar → **Firestore Database → Create database** → **Start in production mode** → pick a region → **Done**
+4. Click the **gear icon** → **Project settings** → scroll to **Your apps** → click **`</>`** (Web)
+5. Give the app any nickname → **Register app** → copy the `firebaseConfig` values shown
+
+### Create the admin user
+
+1. Left sidebar → **Authentication → Get started** → **Email/Password → Enable → Save**
+2. **Users → Add user** → Email: **`admin@quizlive.internal`** → set a password → **Add user**
+
+> The email must be exactly `admin@quizlive.internal` — it's hardcoded in the login screen. Password is never stored in code or env vars.
+
+### Deploy Firestore security rules (REQUIRED)
+
+Without this, the database is wide open.
+
+1. Open [`firestore.rules`](../firestore.rules) → copy all contents
+2. Firebase Console → **Firestore Database → Rules** tab → delete everything → paste → **Publish**
+
+---
+
+## Step 2 — Clone & configure
 
 ```bash
 git clone https://github.com/sivasooryagiri/quizlive.git
 cd quizlive
 npm install
-```
-
----
-
-## Step 2 — Create your Firebase project
-
-1. Go to [console.firebase.google.com](https://console.firebase.google.com)
-2. Create a new project (disable Google Analytics — not needed)
-3. Go to **Project Settings → General → Your apps → Web** and register a web app
-4. Copy the config values shown
-
----
-
-## Step 3 — Enable Firebase Authentication
-
-1. In Firebase console → **Authentication → Get started**
-2. Click **Email/Password** → Enable → Save
-3. Go to **Users → Add user**
-4. Email — use exactly: **`admin@quizlive.internal`** (this is hardcoded in the app — see note below)
-5. Password — pick any strong password
-6. Click **Add user**
-
-> ⚠️ The email `admin@quizlive.internal` is hardcoded in `src/components/admin/LoginScreen.jsx`. The login screen only asks for the password and signs in as that email. **If you create a user with any other email, login will fail.** Want a different email? Edit line 16 of that file.
->
-> The password is **not** an env variable — it lives only inside Firebase Auth. Don't set `VITE_ADMIN_PASSWORD` anywhere.
-
----
-
-## Step 4 — Set up Firestore
-
-1. In Firebase console → **Firestore Database → Create database**
-2. Choose **Start in production mode** (rules get replaced in Step 5; test mode = public read/write, skip it)
-3. Pick any region
-
----
-
-## Step 5 — Deploy Firestore security rules (REQUIRED)
-
-The `firestore.rules` file in this repo blocks players from reading the answers, forging scores, or writing arbitrary data. **Without it, your database is wide open** — and production mode without rules denies everything, so the app won't work either. Publish the rules now.
-
-**Easy way — paste into Firebase Console (no CLI):**
-
-1. Open [`firestore.rules`](../firestore.rules) from this repo → **Copy all** of its contents
-2. Firebase Console → left sidebar → **Firestore Database** → **Rules** tab
-3. Replace everything in the editor → **Publish**
-
-**CLI way:** `npm install -g firebase-tools && firebase login && firebase deploy --only firestore:rules`
-
----
-
-## Step 6 — Configure environment
-
-```bash
 cp .env.example .env
 ```
 
@@ -83,68 +50,46 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000000000000:web:xxxx
-
 VITE_JOIN_URL=http://localhost:5173
 ```
 
 ---
 
-## Step 7 — Run the app
+## Step 3 — Run
 
 ```bash
 npm run dev
 ```
 
-App is live at `http://localhost:5173`
-
-- **Admin panel:** `http://localhost:5173/admin`
-- **Host / projector screen:** `http://localhost:5173/host`
-- **Player join page:** `http://localhost:5173`
+| URL | Purpose |
+|-----|---------|
+| `http://localhost:5173` | Player join |
+| `http://localhost:5173/admin` | Admin panel |
+| `http://localhost:5173/host` | Host / projector |
 
 ---
 
-## Share on your local network (private IP)
+## Share on your local network
 
-This lets people on the same Wi-Fi or LAN join from their phones — no internet needed.
+Let players on the same Wi-Fi join from their phones — no internet needed.
 
-**Step 1 — Find your local IP**
-
-```bash
-# Linux / Mac
-ip addr show | grep "inet " | grep -v 127.0.0.1
-
-# Windows
-ipconfig
-# Look for "IPv4 Address" under your Wi-Fi adapter
-```
-
-Your IP looks like `192.168.x.x` or `10.x.x.x`.
-
-**Step 2 — Start Vite on all interfaces**
+**1. Start Vite on all interfaces:**
 
 ```bash
 npm run dev -- --host
 ```
 
-Vite will print something like:
-
+Vite will print your local IP:
 ```
-  ➜  Local:   http://localhost:5173/
   ➜  Network: http://192.168.1.42:5173/
 ```
 
-**Step 3 — Update the join URL**
-
-In your `.env`:
+**2. Update `.env`:**
 
 ```env
 VITE_JOIN_URL=http://192.168.1.42:5173
 ```
 
-Restart the dev server. The QR code on the host screen now points to your local IP.
+Restart the dev server. The QR code on the host screen now points at your local IP — players scan it to join.
 
-**Step 4 — Share with players**
-
-Players on the same network scan the QR or open `http://192.168.1.42:5173` on their phones.
-
-> Make sure your firewall allows port 5173. On Linux: `sudo ufw allow 5173`
+> If players can't connect, allow the port: `sudo ufw allow 5173` (Linux)

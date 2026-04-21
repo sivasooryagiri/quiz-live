@@ -80,24 +80,32 @@ QuizLive is a free, open-source, real-time multiplayer quiz and trivia platform 
 
 ## 🚀 Getting Started
 
-Pick the setup that fits your situation:
+### ☁️ Recommended — Deploy to Vercel (no git needed)
 
-| Method | Best for | Where it runs |
-|--------|----------|---------------|
-| [🔥 **Firebase + Vercel** ⭐ *Recommended*](docs/deploy-free.md) | **Easiest cloud setup, no server to manage** | **Vercel CDN (global, fast)** |
-| [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, events on same Wi-Fi | Your laptop |
-| [☁️ AWS EC2](docs/deploy-aws.md) | Public quiz, full control, your own server | AWS instance |
-| [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | Any container host |
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sivasooryagiri/quizlive&env=VITE_FIREBASE_API_KEY,VITE_FIREBASE_AUTH_DOMAIN,VITE_FIREBASE_PROJECT_ID,VITE_FIREBASE_STORAGE_BUCKET,VITE_FIREBASE_MESSAGING_SENDER_ID,VITE_FIREBASE_APP_ID,VITE_JOIN_URL&envDescription=Firebase%20config%20from%20your%20Firebase%20project%20settings&envLink=https://github.com/sivasooryagiri/quizlive/blob/main/docs/deploy-free.md&project-name=quizlive&repository-name=quizlive)
+
+Click the button → Vercel clones the repo to your GitHub and walks you through the env vars. **You only need to set up Firebase first** (5 minutes) — [full guide here](docs/deploy-free.md).
 
 > 📖 **Docs:** [Scoring & Ranking](SCORING.md) · [Security & Threat Model](SECURITY.md) · [Firebase Costs](FIREBASE-COSTS.md)
 
-> ⭐ **Recommended:** **Firebase + Vercel CDN** — zero servers to babysit, global CDN, free up to ~80–100 concurrent players. **This is the only setup we've tested end-to-end.** The Local / AWS / Docker paths should work (same code, just different host) but we haven't run them ourselves — your mileage may vary.
+---
 
-> **All four use Firebase Firestore as the real-time database** — that part is the same everywhere. Firebase's free tier comfortably covers normal use (~80–100 concurrent players). For larger events or detailed pricing → [FIREBASE-COSTS.md](FIREBASE-COSTS.md).
+### Other options
+
+| Method | Best for | Where it runs |
+|--------|----------|---------------|
+| [🔥 **Firebase + Vercel** ⭐](docs/deploy-free.md) | Cloud, no server to manage | Vercel CDN (global) |
+| [🏠 Local + Private Network](docs/deploy-local.md) | Classroom, office, same Wi-Fi | Your laptop |
+| [☁️ AWS EC2](docs/deploy-aws.md) | Full control, your own server | AWS instance |
+| [🐳 Docker](docs/deploy-docker.md) | Self-hosted, clean environment | Any container host |
+
+> ⭐ **Firebase + Vercel is the only setup tested end-to-end.** Local / AWS / Docker should work (same code, different host) but aren't officially verified.
+
+> **All options use Firebase Firestore** for the real-time database. Free tier covers ~80–100 concurrent players. For larger events → [FIREBASE-COSTS.md](FIREBASE-COSTS.md).
 
 ---
 
-### ⚡ Quickstart (localhost)
+### ⚡ Quickstart (localhost, developers only)
 
 ```bash
 git clone https://github.com/sivasooryagiri/quizlive.git
@@ -110,27 +118,11 @@ npm run dev
 
 Open `http://localhost:5173`
 
-> ⚠️ **Two manual steps in Firebase Console you must do, or login + security won't work:**
-> 1. **Auth** → add user with email **`admin@quizlive.internal`** (this email is hardcoded — see [LoginScreen.jsx:16](src/components/admin/LoginScreen.jsx)) + your chosen password
-> 2. **Firestore → Rules** tab → paste the contents of [`firestore.rules`](firestore.rules) → Publish
+> ⚠️ **Two steps in Firebase Console required before login + security work:**
+> 1. **Authentication** → add user with email **`admin@quizlive.internal`** + your chosen password
+> 2. **Firestore → Rules** tab → paste contents of [`firestore.rules`](firestore.rules) → Publish
 >
-> Full Firebase setup guide → [docs/deploy-local.md](docs/deploy-local.md)
-
----
-
-### 🐳 Docker
-
-```bash
-git clone https://github.com/sivasooryagiri/quizlive.git
-cd quizlive
-cp .env.example .env
-# fill in your Firebase config in .env
-
-docker build -t quizlive .
-docker run -p 3000:3000 --env-file .env quizlive
-```
-
-Open `http://localhost:3000`
+> Full guide → [docs/deploy-local.md](docs/deploy-local.md)
 
 ---
 

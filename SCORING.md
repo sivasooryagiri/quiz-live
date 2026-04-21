@@ -35,13 +35,11 @@ The score decays linearly with time — fast answers are worth more, but even a 
 
 ### Where the calculation runs
 
-Score is computed on the player's device the moment they tap, then written to Firestore. Firestore **security rules re-validate every write server-side** — the rule recomputes `maxScoreFor(timeTaken, timer)` using the same formula and rejects the write if the submitted score exceeds the cap, if `isCorrect` doesn't match the actual answer key, or if the write is submitted outside the question phase.
+When a player taps an answer, the client writes a **blind answer doc** — just `{answer, timeTaken, timer}` — to Firestore. No score, no `isCorrect`. The Firestore rule validates the format and phase but never touches the correct answer, so it cannot be probed.
 
-Mirror formulas:
-- Client: [`calcScore()` in `src/firebase/db.js`](src/firebase/db.js)
-- Server (Firestore rule): [`maxScoreFor()` in `firestore.rules`](firestore.rules)
+Score is computed at **read time**: `subscribeToPlayers()` joins every answer doc with `/answerKeys` (which only become readable after the question phase ends) and runs `calcScore()` locally. The same happens in `saveSession()` when the quiz ends.
 
-The two are kept byte-for-byte parity so a legit client write always passes.
+The formula lives in one place: [`calcScore()` in `src/firebase/db.js`](src/firebase/db.js).
 
 ---
 
@@ -117,4 +115,4 @@ A: You answered near the end of the timer. The score decays linearly from 30 (in
 A: There were ties. All players tied for rank 3 see `#3` on their phone. The projector's three physical pedestal slots are assigned by the underlying list order (Firebase returns ties in document-insertion order), but the *number* above each slot — and the medal on it — reflects the real tie-aware rank.
 
 **Q: Can someone cheat their score?**
-A: See [SECURITY.md](SECURITY.md) for the full threat model. Short version: player scores can't be written directly — they're aggregated from validated answer documents. The correct-answer key is hidden from the client until the question phase ends. A motivated cheater can still probe for the correct answer with multiple writes (at the cost of a lower score) — closing that fully requires Cloud Functions.
+A: See [SECURITY.md](SECURITY.md) for the full threat model. Short version: scores can't be written directly — they're computed at read time from validated answer docs and the hidden answer key. The correct answer is never revealed during the question phase and the write rule forbids sending `isCorrect` or `score` fields, so there's no way to probe or fake it.
