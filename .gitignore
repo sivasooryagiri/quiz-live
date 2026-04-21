@@ -28,6 +28,10 @@ pnpm-debug.log*
 
 # Firebase
 .firebase/
+firebase.json
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+
+# Local test scripts
+test-*.mjs

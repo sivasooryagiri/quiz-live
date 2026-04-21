@@ -115,11 +115,7 @@ service cloud.firestore {
                     && request.resource.data.name.size() >= 2
                     && request.resource.data.name.size() <= 20
                     && request.resource.data.score == 0;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score'])
-                    && request.resource.data.score is int
-                    && request.resource.data.score >= 0
-                    && request.resource.data.score <= 5000
-                    && math.abs(request.resource.data.score - resource.data.score) <= 30;
+      // No allow update — scores are computed from /answers, never written directly.
       allow delete: if request.auth != null;
     }
 

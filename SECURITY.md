@@ -34,7 +34,7 @@ The `firestore.rules` file enforces server-side checks that the client cannot by
 | `meta/gameState` | public | admin only (bootstrap locked to initial-state values) |
 | `questions/{id}` | public | admin only — `correctAnswer` field is **rejected** here |
 | `answerKeys/{id}` | admin always; public **only** after the question phase ends and only for current-or-past questions | admin only |
-| `players/{id}` | public | join (validated name 2–20 chars, score=0); update is locked to the `score` field, 0–5000, with **per-write delta ≤ 30** |
+| `players/{id}` | public | join only (validated name 2–20 chars, score=0); **no update allowed** — scores are computed from `/answers`, never written to player docs |
 | `answers/{id}` | public | server-validated — see below |
 | `sessions/{id}` | public | admin only |
 
@@ -51,7 +51,7 @@ Every write to `/answers` is validated by Firestore rules using cross-document r
 
 Because the client can't read `correctAnswer` during the question phase, `submitAnswer()` uses a two-attempt pattern: optimistically write `isCorrect: true` with the max-for-time score; if rules reject, retry with `isCorrect: false, score: 0`. Either way the server is authoritative.
 
-> **Why no client-vs-server clock check?** An earlier rule rejected writes whose `timeTaken` disagreed with `request.time - questionStartTime` by more than 2s. It added friction without preventing the attack (a motivated client can always claim `timeTaken: 0` and get the one-question max of 30 pts), and it false-rejected legit players on flaky cell networks. Dropping it matches Kahoot/Slido behavior. Multi-write score inflation is still capped by the ±30-per-write delta on `/players` (see Known Limitations).
+> **Why no client-vs-server clock check?** An earlier rule rejected writes whose `timeTaken` disagreed with `request.time - questionStartTime` by more than 2s. It added friction without preventing the attack (a motivated client can always claim `timeTaken: 0` and get the one-question max of 30 pts), and it false-rejected legit players on flaky cell networks. Dropping it matches Kahoot/Slido behavior.
 
 ### CSV export
 Session history CSV exports neutralize Excel formula injection: cells starting with `= + - @` are prefixed with `'` so they render as text instead of executing.
@@ -62,13 +62,6 @@ Session history CSV exports neutralize Excel formula injection: cells starting w
 ---
 
 ## Known Limitations
-
-### Player score can still be drifted within ±30 per write
-Firestore rules now cap each `/players/{id}.score` update so the absolute delta is ≤ 30 (= the maximum single-question score). A motivated player using DevTools cannot leap to 5000 in one write — they would have to perform ~167 sequential writes, each visible on the live host leaderboard, to fake a winning score. In a classroom this is loud enough to catch.
-
-**Why a residual remains:** Fully closing this requires Cloud Functions (Firebase Blaze plan, paid) so score writes can be cross-checked against the validated answer documents. The free Spark plan doesn't allow that. The ±30 delta cap is the strongest defense possible with rules alone.
-
-**If you need to close it fully:** Fork and add a Cloud Function on Blaze plan that intercepts player updates and recomputes score from validated `/answers/*` documents.
 
 ### The answer-write rule is an oracle
 Because the `isCorrect` check rejects mismatches, a DevTools-savvy player can probe each option during the question phase: write `answer: 0, isCorrect: true`, if rejected try 1, 2, 3 until one succeeds. That reveals the correct answer for the current question only — no earlier/future questions. The cost is that their submission-time shifts later with each probe, lowering their score (the legit max is `maxScoreFor(timeTaken)`, so slow probers earn fewer points than an honest fast player). Closing this fully needs Cloud Functions (Blaze plan) — rules can't hide the correct answer without also refusing to validate legit submissions. For the low-stakes threat model this is an accepted tradeoff; a casual cheater won't find it, and a determined one pays a score penalty for using it.

@@ -267,11 +267,34 @@ export const joinGame = async (rawName) => {
   return ref.id;
 };
 
-export const subscribeToPlayers = (cb) =>
-  onSnapshot(
-    query(playersCol(), orderBy('score', 'desc')),
-    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-  );
+// Aggregates scores live from /answers so direct player doc writes have no effect.
+export const subscribeToPlayers = (cb) => {
+  let players = [];
+  let answers = [];
+
+  const merge = () => {
+    const scoreMap = {};
+    answers.forEach(({ playerId, score }) => {
+      scoreMap[playerId] = (scoreMap[playerId] || 0) + (score || 0);
+    });
+    cb(
+      players
+        .map((p) => ({ ...p, score: scoreMap[p.id] || 0 }))
+        .sort((a, b) => b.score - a.score)
+    );
+  };
+
+  const unsubPlayers = onSnapshot(playersCol(), (snap) => {
+    players = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    merge();
+  });
+  const unsubAnswers = onSnapshot(answersCol(), (snap) => {
+    answers = snap.docs.map((d) => d.data());
+    merge();
+  });
+
+  return () => { unsubPlayers(); unsubAnswers(); };
+};
 
 export const subscribeToPlayerCount = (cb) =>
   onSnapshot(playersCol(), (snap) => cb(snap.size));
@@ -296,22 +319,9 @@ const PERMISSION_DENIED = (e) => {
   return code === 'permission-denied' || code === 'PERMISSION_DENIED';
 };
 
-const writeAnswerTx = (answerRef, playerRef, payload) =>
-  runTransaction(db, async (tx) => {
-    const [answerSnap, playerSnap] = await Promise.all([
-      tx.get(answerRef),
-      tx.get(playerRef),
-    ]);
-    const oldScore = answerSnap.exists() ? (answerSnap.data().score || 0) : 0;
-    tx.set(answerRef, { ...payload, timestamp: serverTimestamp() });
-    if (playerSnap.exists()) {
-      const current = playerSnap.data().score || 0;
-      tx.update(playerRef, {
-        score: Math.max(0, current - oldScore + payload.score),
-      });
-    }
-  });
-
+// Scores are computed from /answers — player docs are never updated.
+// Two-attempt pattern: submit isCorrect=true optimistically; rules reject
+// if the answer is wrong, then retry with isCorrect=false, score=0.
 export const submitAnswer = async ({
   questionId,
   playerId,
@@ -320,21 +330,21 @@ export const submitAnswer = async ({
   timer = 15,
 }) => {
   const answerRef = doc(db, 'answers', `${questionId}_${playerId}`);
-  const playerRef = doc(db, 'players', playerId);
   const optimisticScore = calcScore(true, timeTaken, timer);
 
   try {
-    await writeAnswerTx(answerRef, playerRef, {
+    await setDoc(answerRef, {
       questionId, playerId, answer, timeTaken,
       score: optimisticScore, isCorrect: true,
+      timestamp: serverTimestamp(),
     });
     return optimisticScore;
   } catch (e) {
     if (!PERMISSION_DENIED(e)) throw e;
-    // Rule rejected the optimistic write → answer was wrong.
-    await writeAnswerTx(answerRef, playerRef, {
+    await setDoc(answerRef, {
       questionId, playerId, answer, timeTaken,
       score: 0, isCorrect: false,
+      timestamp: serverTimestamp(),
     });
     return 0;
   }
@@ -373,11 +383,18 @@ export const getPlayerRank = (players, playerId) => {
  * Transaction-guarded: only saves once even with multiple host tabs open.
  */
 export const saveSession = async (gameState) => {
-  // Read players outside the transaction — Firestore transactions only
-  // allow tx.get on doc refs, not collection queries. The race window is
-  // harmless: by the time a quiz ends, no new players are joining.
-  const playerSnap = await getDocs(query(playersCol(), orderBy('score', 'desc')));
-  const players = playerSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const [playerSnap, answerSnap] = await Promise.all([
+    getDocs(playersCol()),
+    getDocs(answersCol()),
+  ]);
+  const scoreMap = {};
+  answerSnap.docs.forEach((d) => {
+    const { playerId, score } = d.data();
+    scoreMap[playerId] = (scoreMap[playerId] || 0) + (score || 0);
+  });
+  const players = playerSnap.docs
+    .map((d) => ({ id: d.id, ...d.data(), score: scoreMap[d.id] || 0 }))
+    .sort((a, b) => b.score - a.score);
   const ranked = players.map((p) => ({
     name:  p.name,
     score: p.score,

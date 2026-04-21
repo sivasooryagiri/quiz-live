@@ -47,9 +47,9 @@ The two are kept byte-for-byte parity so a legit client write always passes.
 
 ## Total score
 
-A player's displayed total is the sum of their per-question scores across the current session. It's stored in `/players/{playerId}.score` and updated atomically in the same transaction that writes the answer doc — no scoreboard drift vs. answer history.
+A player's displayed total is the sum of their per-question scores across the current session. Scores are **computed live from the `/answers` collection** — `subscribeToPlayers()` aggregates every answer doc for each player and sorts by total. Player documents themselves never store a mutable score, so there is nothing for a console attacker to write to.
 
-Firestore rules cap each `/players` update at **±30 per write** (the single-question max), so even a malicious client can't jump from 0 to 5000 in one shot. See [SECURITY.md](SECURITY.md) for the full threat model.
+See [SECURITY.md](SECURITY.md) for the full threat model.
 
 ---
 
@@ -117,4 +117,4 @@ A: You answered near the end of the timer. The score decays linearly from 30 (in
 A: There were ties. All players tied for rank 3 see `#3` on their phone. The projector's three physical pedestal slots are assigned by the underlying list order (Firebase returns ties in document-insertion order), but the *number* above each slot — and the medal on it — reflects the real tie-aware rank.
 
 **Q: Can someone cheat their score?**
-A: See [SECURITY.md](SECURITY.md) for the threat model and what's enforced server-side. Short version: rules check every score write, the per-write delta is capped at 30, and the correct-answer key is hidden from the client until the question phase ends. A motivated cheater can still probe for the correct answer with multiple writes (at the cost of a lower score) — closing that fully requires Cloud Functions.
+A: See [SECURITY.md](SECURITY.md) for the full threat model. Short version: player scores can't be written directly — they're aggregated from validated answer documents. The correct-answer key is hidden from the client until the question phase ends. A motivated cheater can still probe for the correct answer with multiple writes (at the cost of a lower score) — closing that fully requires Cloud Functions.
